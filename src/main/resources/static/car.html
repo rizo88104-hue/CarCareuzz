@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mashina sahifasi — CarCare</title>
+  <link rel="stylesheet" href="/app.css">
+  <style>
+    .lcards { display: grid; gap: 12px; }
+    .lcard { border-radius: 16px; padding: 16px 18px; color: #fff; background: linear-gradient(135deg, #8a5a2b, #c48a4a); }
+    .lcard.Kumush { background: linear-gradient(135deg, #5d6b78, #a3b1bd); }
+    .lcard.Oltin { background: linear-gradient(135deg, #a7741a, #e2b84b); }
+    .lcard.Platina { background: linear-gradient(135deg, #1f3b57, #4f7fa6); }
+    .lcard.off { filter: grayscale(.8); }
+    .lcard .top { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; opacity: .92; }
+    .lcard .bal { font-size: 26px; font-weight: 800; margin: 8px 0 2px; font-variant-numeric: tabular-nums; }
+    .lcard .num { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: .12em; }
+    .lcard .meta { font-size: 12px; margin-top: 8px; opacity: .95; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <a class="brand" href="/" style="color:inherit;text-decoration:none"><div class="logo">🛢</div> CarCare</a>
+
+  <div id="loading" class="empty">Yuklanmoqda...</div>
+  <div id="notFound" class="card hidden">
+    <h2>Mashina topilmadi</h2>
+    <p class="lead">Havola noto'g'ri bo'lishi mumkin.</p>
+    <a class="btn" href="/">Bosh sahifaga</a>
+  </div>
+
+  <div id="page" class="hidden">
+    <!-- Mashina -->
+    <div class="card">
+      <div class="plate-badge"><span class="reg" id="plateReg"></span><span class="num" id="plateNum"></span></div>
+      <div class="owner" id="owner"></div>
+    </div>
+
+    <!-- Eslatma kanallari -->
+    <div class="card">
+      <h2>Eslatmalar</h2>
+      <div class="status-row">
+        <div><span class="dot" id="tgDot"></span><b>Telegram</b>
+          <div class="hint" id="tgHint"></div></div>
+        <a id="tgBtn" class="btn btn-tg btn-sm" target="_blank" rel="noopener">Telegramga ulash</a>
+      </div>
+      <div class="status-row" id="smsRow">
+        <div><span class="dot" id="smsDot"></span><b>SMS</b>
+          <div class="hint" id="smsHint"></div></div>
+        <label class="switch"><input type="checkbox" id="smsToggle"><span></span></label>
+      </div>
+      <div class="status-row">
+        <div class="hint" id="ruleHint"></div>
+        <button class="btn-ghost btn-sm" id="testBtn" type="button">Sinov xabari</button>
+      </div>
+    </div>
+
+    <!-- Faol servislar -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h2 style="margin:0">Servislar</h2>
+        <button class="btn-sm" id="addToggle" type="button">+ Qo'shish</button>
+      </div>
+      <div id="msg" class="msg"></div>
+
+      <form id="addForm" class="hidden" novalidate style="border:1px dashed var(--line);border-radius:12px;padding:14px;margin-bottom:14px">
+        <div class="field">
+          <label for="type">Nima almashtirildi?</label>
+          <select id="type" name="type"></select>
+        </div>
+        <div class="field hidden" id="customWrap">
+          <label for="customName">Nomi</label>
+          <input id="customName" name="customName" maxlength="80" placeholder="Masalan: Rul tyagasi">
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="doneDate">Almashtirilgan sana</label>
+            <input id="doneDate" name="doneDate" type="date" required>
+          </div>
+          <div class="field">
+            <label for="nextDate">Keyingi almashtirish</label>
+            <input id="nextDate" name="nextDate" type="date" required>
+            <div class="chips">
+              <span class="chip" data-months="1">+1 oy</span>
+              <span class="chip" data-months="3">+3 oy</span>
+              <span class="chip" data-months="6">+6 oy</span>
+              <span class="chip" data-months="12">+1 yil</span>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="mileage">Hozirgi probeg, km</label>
+            <input id="mileage" name="mileage" type="number" min="0" inputmode="numeric" placeholder="ixtiyoriy">
+          </div>
+          <div class="field">
+            <label for="nextMileage">Keyingi probeg, km</label>
+            <input id="nextMileage" name="nextMileage" type="number" min="0" inputmode="numeric" placeholder="ixtiyoriy">
+          </div>
+        </div>
+        <div class="field">
+          <label for="note">Izoh</label>
+          <input id="note" name="note" maxlength="300" placeholder="Masalan: Mobil 5W-30, 4 litr">
+        </div>
+        <button type="submit" class="btn-block" id="saveBtn">Saqlash</button>
+      </form>
+
+      <div id="active"></div>
+    </div>
+
+    <!-- Jamg'arma kartalar (sadoqat dasturi) -->
+    <div class="card hidden" id="loyCard">
+      <h2>🎁 Jamg'arma kartalarim</h2>
+      <div class="hint" style="margin-bottom:12px">1 ball = 1 so'm. Ballarni shu servisda to'lovda ishlatish mumkin — kassada karta raqamini yoki mashina raqamini ayting.</div>
+      <div class="lcards" id="loyCards"></div>
+    </div>
+
+    <div class="card history" id="historyCard">
+      <details>
+        <summary>Tarix</summary>
+        <div id="history" style="margin-top:12px"></div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const token = location.pathname.startsWith('/car/')
+      ? decodeURIComponent(location.pathname.split('/')[2] || '')
+      : new URLSearchParams(location.search).get('t');
+  let car = null;
+
+  // ---------- yordamchilar ----------
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const pad = (n) => String(n).padStart(2, '0');
+  const iso = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const fmt = (s) => { const [y, m, d] = s.split('-'); return d + '.' + m + '.' + y; };
+  const parse = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  const km = (n) => n == null ? '' : Number(n).toLocaleString('ru-RU') + ' km';
+
+  async function api(path, opts = {}) {
+    const res = await fetch('/api/cars/' + encodeURIComponent(token) + path, {
+      headers: { 'Content-Type': 'application/json' }, ...opts
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) { const e = new Error(body.error || 'Xatolik'); e.status = res.status; throw e; }
+    return body;
+  }
+  function flash(text, type = 'ok') {
+    const m = $('msg');
+    m.textContent = text; m.className = 'msg show ' + type;
+    clearTimeout(flash.t); flash.t = setTimeout(() => m.className = 'msg', 4000);
+  }
+
+  // ---------- chizish ----------
+  function render(c) {
+    car = c;
+    try { localStorage.setItem('carcare:last', JSON.stringify({ token: c.token, plate: c.plateDisplay })); } catch (e) {}
+    document.title = c.plateDisplay + ' — CarCare';
+
+    $('plateReg').textContent = c.plateNumber.slice(0, 2);
+    $('plateNum').textContent = c.plateDisplay.slice(2).trim();
+    $('owner').textContent = c.firstName + ' ' + c.lastName + ' · ' + c.phone;
+
+    // Telegram
+    $('tgDot').className = 'dot ' + (c.telegramConnected ? 'on' : 'off');
+    $('tgHint').textContent = c.telegramConnected ? 'Ulangan' : 'Ulanmagan — tugmani bosing, botda START va "Raqamni yuborish" ni bosing';
+    if (c.telegramLink) {
+      $('tgBtn').href = c.telegramLink;
+      $('tgBtn').textContent = c.telegramConnected ? 'Botni ochish' : 'Telegramga ulash';
+      $('tgBtn').classList.remove('hidden');
+    } else {
+      $('tgBtn').classList.add('hidden');
+      $('tgHint').textContent = 'Bot hali sozlanmagan (administrator)';
+    }
+
+    // SMS (server sozlamasida o'chiq bo'lsa umuman ko'rsatilmaydi)
+    $('smsRow').classList.toggle('hidden', !c.smsAvailable);
+    $('smsToggle').checked = c.smsEnabled;
+    $('smsToggle').disabled = !c.smsAvailable;
+    $('smsDot').className = 'dot ' + (c.smsEnabled && c.smsAvailable ? 'on' : 'off');
+    $('smsHint').textContent = !c.smsAvailable ? "Hozircha mavjud emas"
+        : c.smsEnabled ? c.phone + ' raqamiga keladi' : "O'chirilgan";
+    $('ruleHint').textContent = 'Muddatga ' + c.reminderDaysBefore + ' kun qolganda va muddat kuni eslatamiz.';
+
+    const active = c.records.filter(r => r.active);
+    const history = c.records.filter(r => !r.active);
+    $('active').innerHTML = active.length ? active.map(recHtml).join('')
+        : '<div class="empty">Hali servis qo\'shilmagan.<br>Masalan, oxirgi marta moy almashtirgan sanangizni kiriting.</div>';
+    $('history').innerHTML = history.length ? history.map(recHtml).join('') : '<div class="empty">Tarix bo\'sh</div>';
+    $('historyCard').classList.toggle('hidden', !history.length);
+
+    // Jamg'arma kartalar
+    const cards = c.loyalty || [];
+    $('loyCard').classList.toggle('hidden', !cards.length);
+    const n = (v) => Number(v || 0).toLocaleString('ru-RU');
+    $('loyCards').innerHTML = cards.map(k =>
+      '<div class="lcard ' + esc(k.levelLabel) + (k.active ? '' : ' off') + '"><div class="top"><span>📍 ' + esc(k.centerName) + '</span><span>' + esc(k.levelIcon + ' ' + k.levelLabel) + '</span></div>' +
+      '<div class="bal">' + n(k.balance) + ' ball</div><div class="num">' + esc(k.cardDisplay) + '</div>' +
+      '<div class="meta">' + (k.active
+        ? 'Keshbek ' + k.cashbackPct + '%' + (k.discountPct ? ' · chegirma ' + k.discountPct + '%' : '') +
+          (k.nextLevelLabel ? ' · ' + esc(k.nextLevelLabel) + ' darajagacha ' + n(k.toNextLevel) + ' so\'m' : '') +
+          (k.expiresOn && k.balance > 0 ? '<br>Ballar ' + fmt(k.expiresOn) + ' gacha amal qiladi' : '')
+        : 'Dastur hozir to\'xtatilgan, ballaringiz saqlangan') + '</div></div>').join('');
+  }
+
+  function recHtml(r) {
+    const d = r.daysLeft;
+    let cls = 'ok', label = d + ' kun qoldi';
+    if (d <= 0) { cls = 'bad'; label = d === 0 ? 'Bugun!' : (-d) + ' kun o\'tdi'; }
+    else if (d <= car.reminderDaysBefore) cls = 'warn';
+    const total = Math.max(1, (parse(r.nextDate) - parse(r.doneDate)) / 864e5);
+    const passed = (new Date().setHours(0,0,0,0) - parse(r.doneDate)) / 864e5;
+    const pct = Math.min(100, Math.max(0, passed / total * 100));
+    const color = cls === 'ok' ? 'var(--ok)' : cls === 'warn' ? 'var(--warn)' : 'var(--bad)';
+    const meta = ['Almashtirildi: ' + fmt(r.doneDate) + (r.mileage != null ? ' · ' + km(r.mileage) : '')];
+    if (r.nextMileage != null) meta.push('Keyingisi: ' + km(r.nextMileage) + ' da');
+    if (r.note) meta.push(r.note);
+    return `
+      <div class="rec">
+        <div class="rec-head">
+          <div>
+            <div class="rec-name">${esc(r.name)}</div>
+            <div class="rec-meta">Keyingi: <b>${fmt(r.nextDate)}</b></div>
+          </div>
+          ${r.active ? `<span class="pill ${cls}">${label}</span>` : ''}
+        </div>
+        ${r.active ? `<div class="bar"><i style="width:${pct}%;background:${color}"></i></div>` : ''}
+        <div class="rec-foot">
+          <div class="rec-meta">${meta.map(esc).join('<br>')}</div>
+          <div style="display:flex;gap:10px">
+            ${r.active ? `<button class="link" data-renew="${r.type}" data-name="${esc(r.type === 'OTHER' ? r.name : '')}" style="color:var(--brand)">Almashtirdim</button>` : ''}
+            <button class="link" data-del="${r.id}">O'chirish</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ---------- forma ----------
+  function openForm(type, name) {
+    const f = $('addForm');
+    f.reset();
+    f.classList.remove('hidden');
+    $('doneDate').value = iso(new Date());
+    $('doneDate').max = iso(new Date());
+    if (type) $('type').value = type;
+    if (name) $('customName').value = name;
+    $('customWrap').classList.toggle('hidden', $('type').value !== 'OTHER');
+    $('addToggle').textContent = 'Yopish';
+    f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function closeForm() {
+    $('addForm').classList.add('hidden');
+    $('addToggle').textContent = '+ Qo\'shish';
+  }
+
+  $('addToggle').onclick = () => $('addForm').classList.contains('hidden') ? openForm() : closeForm();
+  $('type').onchange = () => $('customWrap').classList.toggle('hidden', $('type').value !== 'OTHER');
+
+  document.querySelectorAll('.chip[data-months]').forEach(ch => ch.onclick = () => {
+    const base = $('doneDate').value ? parse($('doneDate').value) : new Date();
+    base.setMonth(base.getMonth() + Number(ch.dataset.months));
+    $('nextDate').value = iso(base);
+  });
+
+  $('addForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = Object.fromEntries(new FormData(e.target));
+    if (!fd.doneDate || !fd.nextDate) return flash('Ikkala sanani ham kiriting', 'err');
+    const body = {
+      type: fd.type,
+      customName: fd.customName || null,
+      doneDate: fd.doneDate,
+      nextDate: fd.nextDate,
+      mileage: fd.mileage ? Number(fd.mileage) : null,
+      nextMileage: fd.nextMileage ? Number(fd.nextMileage) : null,
+      note: fd.note || null
+    };
+    $('saveBtn').disabled = true;
+    try {
+      render(await api('/records', { method: 'POST', body: JSON.stringify(body) }));
+      closeForm();
+      flash('Saqlandi ✅');
+    } catch (err) { flash(err.message, 'err'); }
+    $('saveBtn').disabled = false;
+  };
+
+  document.addEventListener('click', async (e) => {
+    const del = e.target.closest('[data-del]');
+    const renew = e.target.closest('[data-renew]');
+    if (del) {
+      if (!confirm('Bu yozuvni o\'chirasizmi?')) return;
+      try { render(await api('/records/' + del.dataset.del, { method: 'DELETE' })); flash('O\'chirildi'); }
+      catch (err) { flash(err.message, 'err'); }
+    } else if (renew) {
+      openForm(renew.dataset.renew, renew.dataset.name);
+    }
+  });
+
+  $('smsToggle').onchange = async (e) => {
+    try { render(await api('/settings', { method: 'PATCH', body: JSON.stringify({ smsEnabled: e.target.checked }) })); }
+    catch (err) { flash(err.message, 'err'); e.target.checked = !e.target.checked; }
+  };
+
+  $('testBtn').onclick = async () => {
+    try { await api('/test', { method: 'POST' }); flash('Sinov xabari yuborildi ✅'); }
+    catch (err) { flash(err.message, 'err'); }
+  };
+
+  // Telegramga ulangandan keyin sahifaga qaytganda holatni yangilash
+  document.addEventListener('visibilitychange', async () => {
+    if (!document.hidden && car && !car.telegramConnected) {
+      try { render(await api('')); } catch (e) {}
+    }
+  });
+
+  // ---------- yuklash ----------
+  (async () => {
+    try {
+      const types = await fetch('/api/service-types').then(r => r.json());
+      $('type').innerHTML = types.map(t => `<option value="${t.code}">${esc(t.label)}</option>`).join('');
+      if (!token) throw Object.assign(new Error(), { status: 404 });
+      render(await api(''));
+      $('page').classList.remove('hidden');
+    } catch (err) {
+      $('notFound').classList.remove('hidden');
+    }
+    $('loading').classList.add('hidden');
+  })();
+</script>
+</body>
+</html>

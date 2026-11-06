@@ -1,0 +1,79 @@
+/* ============================================================
+   Bosh sahifa foni: haqiqiy foto + sekin harakat (Ken Burns effekti)
+   va matn o'qilishi uchun qorong'i qatlam.
+
+   RASMNI ALMASHTIRISH:
+   1) Eng yaxshi yo'l: o'zingiz yoqtirgan rasmni yuklab oling va
+      src/main/resources/static/img/bg.jpg nomi bilan saqlang.
+      U avtomatik birinchi bo'lib ko'rsatiladi (internetsiz ham ishlaydi).
+   2) Yoki pastdagi --bg-remote manzilini boshqa rasm manziliga almashtiring.
+   ============================================================ */
+
+:root {
+  /* Foto: Jimmy Nilsson Masth, Unsplash (bepul, Unsplash License) */
+  --bg-remote: url("https://images.unsplash.com/photo-1643700973089-baa86a1ab9ee?auto=format&fit=crop&w=2000&q=70");
+  --bg-local: url("/img/bg.jpg");
+}
+
+body.has-scene { background: #0e2a33; }
+
+.scene {
+  position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+  background: #0e2a33;
+}
+
+/* Foto qatlami: lokal rasm bo'lsa — u, bo'lmasa — internetdagi rasm */
+.scene .photo {
+  position: absolute; inset: -6%;
+  background-image: var(--bg-local), var(--bg-remote);
+  background-size: cover, cover;
+  background-position: center, center;
+  transform-origin: 60% 50%;
+  animation: kenburns 32s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* Qorong'i rangli qatlam: oq matn har qanday rasm ustida o'qiladi */
+.scene .shade {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 28, 35, .82) 0%, rgba(8, 28, 35, .55) 45%, rgba(8, 28, 35, .85) 100%),
+    radial-gradient(ellipse at 80% 90%, rgba(242, 165, 65, .25), transparent 60%);
+}
+
+/* Sekin suzuvchi yorug'lik (ustaxona chiroqlari kabi) */
+.scene .glow {
+  position: absolute; width: 520px; height: 520px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(242, 165, 65, .22), transparent 65%);
+  filter: blur(10px);
+  animation: float 18s ease-in-out infinite alternate;
+}
+.scene .glow.g1 { left: -120px; top: 10%; }
+.scene .glow.g2 { right: -160px; bottom: -80px; animation-duration: 24s; animation-delay: -8s;
+  background: radial-gradient(circle, rgba(95, 179, 201, .2), transparent 65%); }
+
+.has-scene .wrap { position: relative; z-index: 1; }
+
+/* Hero matni fon ustida */
+.has-scene .brand,
+.has-scene h1,
+.has-scene footer { color: #ffffff; text-shadow: 0 2px 14px rgba(0, 0, 0, .45); }
+.has-scene p.lead { color: rgba(255, 255, 255, .9); text-shadow: 0 1px 10px rgba(0, 0, 0, .45); }
+.has-scene .card { box-shadow: 0 14px 50px rgba(0, 0, 0, .35); }
+.has-scene .photo-credit { color: rgba(255, 255, 255, .6); font-size: 12px; }
+.has-scene .photo-credit a { color: inherit; }
+
+@keyframes kenburns {
+  0%   { transform: scale(1.0)  translate(0, 0); }
+  50%  { transform: scale(1.08) translate(-1.5%, 1%); }
+  100% { transform: scale(1.14) translate(1.5%, -1%); }
+}
+@keyframes float {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(80px, -60px); }
+}
+
+/* Animatsiyani o'chirib qo'ygan foydalanuvchilar uchun — harakatsiz */
+@media (prefers-reduced-motion: reduce) {
+  .scene *, .scene { animation: none !important; }
+}

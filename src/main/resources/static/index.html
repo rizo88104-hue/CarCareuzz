@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CarCare — servis eslatmalari</title>
+  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/scene.css">
+</head>
+<body class="has-scene">
+<!-- Fon: haqiqiy foto + sekin harakat (bezak, ekran o'quvchilar uchun yashirilgan) -->
+<div class="scene" aria-hidden="true">
+  <div class="photo"></div>
+  <div class="shade"></div>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+</div>
+
+<div class="wrap">
+  <div class="brand"><div class="logo">🛢</div> CarCare</div>
+
+  <h1>Moy almashtirish vaqtini unutmang</h1>
+  <p class="lead">Ma'lumotlaringizni kiriting — mashinangiz uchun shaxsiy sahifa ochiladi.
+    Muddatga 1 hafta qolganda Telegram orqali eslatamiz.</p>
+
+  <div class="card">
+    <div id="msg" class="msg"></div>
+    <form id="form" novalidate>
+      <div class="row">
+        <div class="field">
+          <label for="firstName">Ism</label>
+          <input id="firstName" name="firstName" autocomplete="given-name" required maxlength="60">
+        </div>
+        <div class="field">
+          <label for="lastName">Familiya</label>
+          <input id="lastName" name="lastName" autocomplete="family-name" required maxlength="60">
+        </div>
+      </div>
+      <div class="field">
+        <label for="phone">Telefon raqam</label>
+        <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel"
+               placeholder="+998 90 123 45 67" value="+998 " required>
+      </div>
+      <div class="field">
+        <label for="plateNumber">Mashina raqami</label>
+        <input id="plateNumber" name="plateNumber" class="plate" placeholder="01 A 123 BC" required maxlength="14">
+        <div class="hint">Oldin ro'yxatdan o'tgan bo'lsangiz, xuddi shu raqam va telefon bilan sahifangizga qayta kirasiz.</div>
+      </div>
+      <button id="submit" class="btn-block" type="submit">Davom etish →</button>
+    </form>
+  </div>
+
+  <div id="recent" class="card hidden">
+    <h2>Oxirgi kirgan mashinangiz</h2>
+    <a id="recentLink" class="btn btn-ghost btn-block" href="#"></a>
+  </div>
+
+  <footer>Ma'lumotlaringiz faqat eslatma yuborish uchun ishlatiladi.
+    <div class="photo-credit">Foto: <a href="https://unsplash.com/photos/a-man-working-on-a-car-in-a-garage-jL9zfzTVSwY" target="_blank" rel="noopener">Jimmy Nilsson Masth / Unsplash</a></div>
+  </footer>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const form = $('form'), msg = $('msg'), btn = $('submit');
+
+  // Oxirgi ochilgan mashina sahifasi (shu brauzerda)
+  try {
+    const last = JSON.parse(localStorage.getItem('carcare:last') || 'null');
+    if (last && last.token) {
+      $('recent').classList.remove('hidden');
+      $('recentLink').textContent = '🚗 ' + last.plate + ' sahifasini ochish';
+      $('recentLink').href = '/car/' + last.token;
+    }
+  } catch (e) {}
+
+  function show(text, type) {
+    msg.textContent = text;
+    msg.className = 'msg show ' + type;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form));
+    if (!data.firstName.trim() || !data.lastName.trim() || !data.plateNumber.trim() || data.phone.replace(/\D/g, '').length < 9) {
+      show("Iltimos, barcha maydonlarni to'ldiring", 'err');
+      return;
+    }
+    btn.disabled = true; btn.textContent = 'Yuborilmoqda...';
+    try {
+      const res = await fetch('/api/cars', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || 'Xatolik');
+      location.href = '/car/' + body.token;
+    } catch (err) {
+      show(err.message, 'err');
+      btn.disabled = false; btn.textContent = 'Davom etish →';
+    }
+  });
+</script>
+</body>
+</html>

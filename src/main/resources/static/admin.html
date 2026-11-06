@@ -1,0 +1,1649 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Admin panel — CarCare</title>
+  <link rel="stylesheet" href="/app.css">
+  <style>
+    .wrap { max-width: 1040px; }
+    .topbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .who { font-size: 14px; color: var(--muted); }
+    .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .tabs button { background: transparent; color: var(--muted); border: 1px solid var(--line); padding: 8px 14px; }
+    .tabs button[aria-pressed="true"] { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .tile { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+    .tile b { display: block; font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .tile span { font-size: 13px; color: var(--muted); }
+    .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+    @media (max-width: 820px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+    .item { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; background: #fff; }
+    .item-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+    .item-title { font-weight: 800; }
+    .small { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+    .tel { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--brand); text-decoration: none; border: 1px solid var(--line); border-radius: 10px; padding: 7px 11px; font-size: 14px; }
+    .tg-badge { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+    .tg-badge.on { background: #e3f1fa; color: #1c79ad; }
+    .tg-badge.off { background: #f1eee8; color: var(--muted); }
+    .ownerbox { background: #f7f5f0; border-radius: 10px; padding: 12px; font-size: 14px; }
+    .check { display: flex; gap: 10px; align-items: center; font-weight: 600; font-size: 14px; }
+    .check input { width: auto; }
+    .pill.grey { background: #eceae4; color: var(--muted); }
+    .missed { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 10px; }
+    .missed .row-m { display: grid; gap: 2px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .reason { font-weight: 700; color: var(--bad); font-size: 14px; }
+    .statline { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; }
+    .inline { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .inline input { padding: 8px 10px; flex: 1 1 200px; }
+    .result { border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; font-size: 14px; }
+    .result.ok { background: #e8f5ec; color: #1f5c3a; }
+    .result.warn { background: #fdf3e0; color: #7a5410; }
+    h2 small { font-weight: 600; color: var(--muted); font-size: 13px; }
+    .logrow { display: flex; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .logrow time { color: var(--muted); flex: none; width: 110px; font-size: 13px; font-variant-numeric: tabular-nums; }
+    .logrow .meta { color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 8px 6px; border-bottom: 1px solid var(--line); }
+    td { padding: 10px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    .tablebox { overflow-x: auto; }
+    .kv { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .kv strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+    td button { white-space: nowrap; }
+    .prof-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, .9fr); gap: 16px; margin-top: 12px; align-items: start; }
+    @media (max-width: 920px) { .prof-grid { grid-template-columns: minmax(0, 1fr); } }
+    .prof-grid .card { margin-bottom: 0; }
+    .avatar { width: 52px; height: 52px; border-radius: 14px; background: var(--brand); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 20px; flex: none; }
+    .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; margin: 16px 0; }
+    .facts .lbl { font-size: 12px; color: var(--muted); }
+    .facts .val { font-weight: 700; font-size: 14px; overflow-wrap: anywhere; }
+    .minis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 10px; }
+    .mini { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+    .mini span { display: block; font-size: 12px; color: var(--muted); }
+    .mini b { display: block; font-size: 17px; font-variant-numeric: tabular-nums; margin-top: 2px; }
+    .linkbox { background: #f7f5f0; border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-top: 10px; overflow-wrap: anywhere; }
+    #profTabs { margin-top: 16px; }
+    /* Sadoqat: jamg'arma karta */
+    .lcard { border-radius: 16px; padding: 16px 18px; color: #fff; position: relative; overflow: hidden; background: linear-gradient(135deg, #8a5a2b, #c48a4a); }
+    .lcard.SILVER { background: linear-gradient(135deg, #5d6b78, #a3b1bd); }
+    .lcard.GOLD { background: linear-gradient(135deg, #a7741a, #e2b84b); }
+    .lcard.PLATINUM { background: linear-gradient(135deg, #1f3b57, #4f7fa6); }
+    .lcard.off { filter: grayscale(.8); }
+    .lcard .lc-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; opacity: .92; }
+    .lcard .lc-bal { font-size: 28px; font-weight: 800; margin: 10px 0 2px; font-variant-numeric: tabular-nums; }
+    .lcard .lc-num { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: .12em; font-size: 15px; }
+    .lcard .lc-bar { height: 6px; background: rgba(255,255,255,.3); border-radius: 99px; margin-top: 10px; overflow: hidden; }
+    .lcard .lc-bar i { display: block; height: 100%; background: #fff; border-radius: 99px; }
+    .lvl { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #f4ecdf; color: #7a5410; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .lvl.SILVER { background: #eceff2; color: #4a5763; }
+    .lvl.GOLD { background: #fbf1d5; color: #85600f; }
+    .lvl.PLATINUM { background: #e3edf6; color: #1f4b73; }
+    .loybox { background: #fbf6ec; border: 1px solid #efe1c4; border-radius: 10px; padding: 10px 12px; font-size: 14px; margin-bottom: 12px; }
+    .lvl-table input { padding: 7px 8px; min-width: 0; }
+    .lvl-table td { padding: 6px 4px; }
+    .pts-plus { color: var(--ok); font-weight: 700; }
+    .pts-minus { color: var(--bad); font-weight: 700; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ LOGIN ============ -->
+  <div id="vLogin" class="hidden">
+    <div class="brand"><div class="logo">🛢</div> CarCare · Admin</div>
+    <div class="card" style="max-width:420px">
+      <h2>Tizimga kirish</h2>
+      <div id="loginMsg" class="msg"></div>
+      <form id="loginForm" novalidate>
+        <div class="field"><label for="lu">Login</label><input id="lu" autocomplete="username" required></div>
+        <div class="field"><label for="lp">Parol</label><input id="lp" type="password" autocomplete="current-password" required></div>
+        <button class="btn-block" type="submit">Kirish</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ YUQORI QISM ============ -->
+  <div id="vTop" class="topbar hidden">
+    <div class="brand" style="margin:0"><div class="logo">🛢</div> <span id="topTitle">CarCare</span></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span class="who" id="who"></span>
+      <button class="btn-ghost btn-sm" id="pwToggle" type="button">Parol</button>
+      <button class="btn-ghost btn-sm" id="logout" type="button">Chiqish</button>
+    </div>
+  </div>
+  <div id="pwCard" class="card hidden" style="max-width:420px">
+    <h2>Parolni o'zgartirish</h2>
+    <div id="pwMsg" class="msg"></div>
+    <form id="pwForm" novalidate>
+      <div class="field"><label for="pwOld">Joriy parol</label><input id="pwOld" type="password" autocomplete="current-password"></div>
+      <div class="field"><label for="pwNew">Yangi parol (kamida 8 belgi)</label><input id="pwNew" type="password" autocomplete="new-password"></div>
+      <button type="submit">Saqlash</button>
+    </form>
+  </div>
+  <div id="tabs" class="tabs hidden" role="group" aria-label="Bo'limlar"></div>
+
+  <!-- ============ SERVIS: ISHLAR ============ -->
+  <div id="vWork" class="hidden">
+    <div class="tiles" id="cTiles"></div>
+    <div class="cols">
+      <div class="card">
+        <h2>Bajarilgan ishni kiritish</h2>
+        <div id="saveResult"></div>
+        <form id="recForm" novalidate>
+          <div class="field">
+            <label for="rPlate">Mashina raqami</label>
+            <input id="rPlate" class="plate" placeholder="01 A 123 BC" maxlength="14" autocomplete="off">
+          </div>
+          <div id="ownerBox" class="field hidden"></div>
+          <div id="newOwner" class="hidden">
+            <div class="hint" style="margin-bottom:8px">Bu mashina hali ro'yxatda yo'q — egasining ma'lumotlarini kiriting.</div>
+            <div class="row">
+              <div class="field"><label for="rFn">Ism</label><input id="rFn" maxlength="60"></div>
+              <div class="field"><label for="rLn">Familiya</label><input id="rLn" maxlength="60"></div>
+            </div>
+            <div class="field"><label for="rPh">Telefon</label><input id="rPh" type="tel" value="+998 "></div>
+          </div>
+          <div class="row">
+            <div class="field"><label for="rType">Nima qilindi?</label><select id="rType"></select></div>
+            <div class="field" id="masterWrap"><label for="rMaster">Usta</label><select id="rMaster"></select></div>
+          </div>
+          <div class="field hidden" id="rCustomWrap"><label for="rCustom">Nomi</label><input id="rCustom" maxlength="80"></div>
+          <div class="row">
+            <div class="field"><label for="rDone">Bajarilgan sana</label><input id="rDone" type="date"></div>
+            <div class="field"><label for="rNext">Keyingi almashtirish</label><input id="rNext" type="date">
+              <div class="chips">
+                <span class="chip" data-m="3">+3 oy</span><span class="chip" data-m="6">+6 oy</span><span class="chip" data-m="12">+1 yil</span>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field"><label for="rKm">Probeg, km</label><input id="rKm" type="number" min="0" placeholder="ixtiyoriy"></div>
+            <div class="field"><label for="rNote">Izoh</label><input id="rNote" maxlength="300" placeholder="Masalan: 205/55 R16"></div>
+          </div>
+          <div id="moneyWrap" style="border-top:1px dashed var(--line);padding-top:12px;margin-bottom:12px">
+            <div class="row">
+              <div class="field"><label for="rPrice" id="rPriceLbl">Narxi, so'm</label><input id="rPrice" inputmode="numeric" placeholder="masalan 250 000" autocomplete="off"></div>
+              <div class="field"><label for="rPaid">Hozir to'landi, so'm</label><input id="rPaid" inputmode="numeric" placeholder="to'liq to'landi" autocomplete="off"></div>
+            </div>
+            <div id="loyWrap" class="loybox hidden">
+              <div id="loyInfo"></div>
+              <label class="check" for="rDisc" id="rDiscWrap" style="margin-top:8px"><input id="rDisc" type="checkbox" checked> <span id="rDiscLbl">Chegirmani qo'llash</span></label>
+              <div class="field" id="rBonusWrap" style="margin:8px 0 0"><label for="rBonus">Ball bilan to'lash, so'm</label>
+                <div style="display:flex;gap:8px"><input id="rBonus" inputmode="numeric" placeholder="0" autocomplete="off"><button class="btn-ghost btn-sm" type="button" id="rBonusMax">Maksimal</button></div>
+                <div class="hint" id="rBonusHint"></div></div>
+            </div>
+            <div class="row">
+              <div class="field"><label for="rMethod">To'lov turi</label>
+                <select id="rMethod"><option value="CASH">Naqd</option><option value="CARD">Karta</option><option value="TRANSFER">O'tkazma</option></select></div>
+              <div class="field hidden" id="dueWrap"><label for="rDue">Qarzni to'lash muddati</label><input id="rDue" type="date"></div>
+            </div>
+            <div class="hint" id="debtHint"></div>
+          </div>
+          <label class="check field" for="rReady" id="readyWrap"><input id="rReady" type="checkbox" checked> Mijozga "Tayyor, keling" xabarini yuborish</label>
+          <div class="hint hidden" id="masterHint" style="margin-bottom:12px">Ish saqlanadi, mijozga xabarni administrator yuboradi.</div>
+          <button class="btn-block" type="submit" id="rSave">Saqlash</button>
+        </form>
+      </div>
+
+      <div>
+        <div class="card" id="callCard">
+          <h2>Qo'ng'iroq ro'yxati <small>· muddati yaqin va o'tganlar</small></h2>
+          <div id="callList"></div>
+        </div>
+        <div class="card">
+          <h2 id="recentTitle">Oxirgi ishlar</h2>
+          <div id="recent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DIREKTOR: XODIMLAR ============ -->
+  <div id="vStaff" class="hidden">
+    <div class="cols">
+      <div class="card">
+        <h2>Xodimlar</h2>
+        <div class="hint">Bloklangan xodim barcha qurilmalardan darhol chiqariladi.</div>
+        <div id="staffMsg" class="msg" style="margin-top:10px"></div>
+        <div class="tablebox" style="margin-top:10px"><table>
+          <thead><tr><th>Ism</th><th>Rol</th><th>Login</th><th>Holat</th><th></th></tr></thead>
+          <tbody id="staffRows"></tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <h2>Yangi xodim</h2>
+        <div id="sfMsg" class="msg"></div>
+        <form id="staffForm" novalidate>
+          <div class="field"><label for="sfName">Ism familiya</label><input id="sfName" maxlength="80"></div>
+          <div class="field"><label for="sfRole">Rol</label>
+            <select id="sfRole"><option value="MASTER">Usta — faqat ish kiritadi</option><option value="ADMINISTRATOR">Administrator — mijozlar bilan ishlaydi</option></select></div>
+          <div class="row">
+            <div class="field"><label for="sfUser">Login</label><input id="sfUser" maxlength="40" autocomplete="off"></div>
+            <div class="field"><label for="sfPass">Parol</label><input id="sfPass" type="text" autocomplete="off" placeholder="kamida 8 belgi"></div>
+          </div>
+          <button type="submit">Qo'shish</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BOSH SAHIFA ============ -->
+  <div id="vHome" class="hidden">
+    <div id="homeMsg" class="msg"></div>
+    <div class="tiles" id="homeTiles"></div>
+    <div class="cols">
+      <div class="card"><h2>Tushum dinamikasi <small id="homeMonth"></small></h2><div id="homeChart"></div></div>
+      <div class="card"><h2>Mijozlar</h2><div id="homeCust"></div></div>
+    </div>
+    <div class="cols">
+      <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2 style="margin:0">Qarzdorlar</h2><button class="btn-ghost btn-sm" type="button" data-tab="debts">Qarz daftari →</button></div><div id="homeDebtors" style="margin-top:10px"></div></div>
+      <div class="card"><h2>🎂 Shu oy tug'ilgan kunlar</h2><div id="homeBdays"></div></div>
+    </div>
+  </div>
+
+  <!-- ============ QARZ DAFTARI ============ -->
+  <div id="vDebts" class="hidden">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+        <div><h2 style="margin:0">Qarz daftari</h2><div class="hint">Qarzga qilingan ishlar. Davr — ish bajarilgan sana bo'yicha.</div></div>
+        <div class="chips" id="debtPeriods"></div>
+      </div>
+      <div class="field" style="margin-top:12px"><label for="debtQ">Qidirish</label>
+        <input id="debtQ" type="search" placeholder="Mijoz ismi, telefon yoki mashina raqami" autocomplete="off"></div>
+      <div class="tiles" id="debtTiles"></div>
+      <div class="chips" id="debtFilters" style="margin-bottom:12px"></div>
+      <div id="debtMsg" class="msg"></div>
+      <div class="tablebox"><table>
+        <thead><tr><th>Mijoz</th><th>Ish</th><th style="text-align:right">Qarz summasi</th><th style="text-align:right">To'langan</th><th style="text-align:right">Qoldiq</th><th>Holati</th><th>To'lov muddati</th><th></th></tr></thead>
+        <tbody id="debtRows"></tbody>
+      </table></div>
+      <div class="small" id="debtMore" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- To'lov / narx oynasi -->
+  <div id="payModal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="payTitle"
+       style="position:fixed;inset:0;background:rgba(20,32,40,.45);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px">
+    <div class="card" style="width:min(460px,100%);max-height:90vh;overflow:auto;margin:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <h2 id="payTitle" style="margin:0">To'lov qabul qilish</h2>
+        <button class="btn-ghost btn-sm" type="button" id="payClose" aria-label="Yopish">✕</button>
+      </div>
+      <div class="small" id="payInfo" style="margin:6px 0 12px"></div>
+      <div id="payMsg" class="msg"></div>
+      <form id="payForm" novalidate>
+        <div class="field"><label for="payAmount" id="payAmountLbl">Summa, so'm</label><input id="payAmount" inputmode="numeric" autocomplete="off"></div>
+        <div class="field" id="payMethodWrap"><label for="payMethod">To'lov turi</label>
+          <select id="payMethod"><option value="CASH">Naqd</option><option value="CARD">Karta</option><option value="TRANSFER">O'tkazma</option></select>
+          <div class="hint" id="payBonusHint"></div></div>
+        <label class="check field hidden" for="payDisc" id="payDiscWrap"><input id="payDisc" type="checkbox" checked> <span id="payDiscLbl"></span></label>
+        <div class="field" id="payDueWrap"><label for="payDue">Qarzni to'lash muddati</label><input id="payDue" type="date"></div>
+        <div class="field" id="payNoteWrap"><label for="payNote">Izoh</label><input id="payNote" maxlength="200" placeholder="ixtiyoriy"></div>
+        <button class="btn-block" type="submit" id="paySave">Saqlash</button>
+      </form>
+      <div id="payHistory" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <!-- Telegram xabar oynasi -->
+  <div id="msgModal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="msgTitle"
+       style="position:fixed;inset:0;background:rgba(20,32,40,.45);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px">
+    <div class="card" style="width:min(480px,100%);max-height:90vh;overflow:auto;margin:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <h2 id="msgTitle" style="margin:0">✉️ Telegram xabar</h2>
+        <button class="btn-ghost btn-sm" type="button" id="msgClose" aria-label="Yopish">✕</button>
+      </div>
+      <div class="small" id="msgInfo" style="margin:6px 0 12px"></div>
+      <div id="msgMsg" class="msg"></div>
+      <form id="msgForm" novalidate>
+        <div class="chips" id="msgTemplates" style="margin-bottom:10px"></div>
+        <div class="field"><label for="msgText">Xabar matni</label><textarea id="msgText" rows="5" maxlength="1000"></textarea>
+          <div class="hint">Xabar boshida servis nomi, oxirida servis telefoni avtomatik qo'shiladi.</div></div>
+        <button class="btn-block" type="submit" id="msgSend">Yuborish</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ MIJOZLAR BAZASI ============ -->
+  <div id="vCustomers" class="hidden">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+        <div><h2 style="margin:0">Mijozlar bazasi</h2><div class="hint" id="custHint"></div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-ghost btn-sm hidden" id="custExport" type="button">Excel'ga yuklab olish</button>
+          <button class="btn-sm hidden" id="custAddBtn" type="button">+ Qo'shish</button>
+        </div>
+      </div>
+      <div class="tiles" id="custTiles" style="margin-top:14px"></div>
+      <div class="field" style="margin-top:12px">
+        <label for="custQ">Qidirish</label>
+        <input id="custQ" type="search" placeholder="Mashina raqami, ism, telefon yoki izoh" autocomplete="off">
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <button class="btn-ghost btn-sm hidden" type="button" id="bdayBtn"></button>
+        <div class="chips" id="custFilters" style="margin:0"></div>
+      </div>
+      <div id="custMsg" class="msg"></div>
+      <div class="tablebox"><table><thead id="custHead"></thead><tbody id="custRows"></tbody></table></div>
+      <div class="small" id="custMore" style="margin-top:8px"></div>
+    </div>
+    <div class="card hidden" id="custCard"></div>
+    <div class="card hidden" id="addCustCard">
+      <h2>Yangi mijoz qo'shish</h2>
+      <div class="hint">Mashina tizimda bor bo'lsa, faqat sizning bazangizga bog'lanadi.</div>
+      <div id="acMsg" class="msg" style="margin-top:10px"></div>
+      <form id="addCustForm" novalidate style="margin-top:10px">
+        <div class="row">
+          <div class="field"><label for="acPlate">Mashina raqami</label><input id="acPlate" class="plate" maxlength="14" placeholder="01 A 123 BC" autocomplete="off"></div>
+          <div class="field"><label for="acPhone">Telefon</label><input id="acPhone" type="tel" value="+998 "></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="acFn">Ism</label><input id="acFn" maxlength="60"></div>
+          <div class="field"><label for="acLn">Familiya</label><input id="acLn" maxlength="60"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="acBd">Tug'ilgan kun</label><input id="acBd" type="date"></div>
+          <div class="field"><label for="acG">Jinsi</label><select id="acG"><option value="">—</option><option value="MALE">Erkak</option><option value="FEMALE">Ayol</option></select></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="acSrc">Mijoz qayerdan kelgan</label><select id="acSrc"></select></div>
+          <div class="field"><label for="acNote">Izoh</label><input id="acNote" maxlength="500" placeholder="ixtiyoriy"></div>
+        </div>
+        <div class="btns"><button type="submit">Saqlash</button><button class="btn-ghost" type="button" id="acCancel">Bekor qilish</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ MIJOZ PROFILI ============ -->
+  <div id="vProfile" class="hidden">
+    <button class="btn-ghost btn-sm" type="button" id="profBack">← Orqaga</button>
+    <div id="profMsg" class="msg" style="margin-top:12px"></div>
+    <div class="prof-grid">
+      <div class="card" id="profInfo"></div>
+      <div id="profMiddle"></div>
+      <div id="profSide"></div>
+    </div>
+    <div class="tabs" id="profTabs" role="group" aria-label="Profil bo'limlari">
+      <button type="button" data-ptab="history">Servislar tarixi</button>
+      <button type="button" data-ptab="debts">Qarzlar va to'lovlar</button>
+      <button type="button" data-ptab="loyalty">🎁 Bonus ballar</button>
+    </div>
+    <div id="profTabBody"></div>
+  </div>
+
+  <!-- ============ SADOQAT DASTURI ============ -->
+  <div id="vLoyalty" class="hidden">
+    <div id="loyMsg" class="msg"></div>
+    <div id="loyIntro" class="card hidden"></div>
+    <div class="tiles" id="loyTiles"></div>
+    <div class="cols">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap">
+          <div><h2 style="margin:0">Jamg'arma kartalar</h2><div class="hint">Mijozni bosing — profili ochiladi. Karta raqami bo'yicha ham qidiriladi.</div></div>
+          <button class="btn-ghost btn-sm hidden" type="button" id="loyIssueAll">Kartasi yo'qlarga karta ochish</button>
+        </div>
+        <div id="loyIssueBox" class="linkbox hidden"></div>
+        <div class="field" style="margin-top:12px"><label for="loyQ">Qidirish</label>
+          <input id="loyQ" type="search" placeholder="Ism, mashina raqami, telefon yoki karta raqami" autocomplete="off"></div>
+        <div class="chips" id="loyLevels" style="margin-bottom:10px"></div>
+        <div class="tablebox"><table>
+          <thead><tr><th>Mijoz</th><th>Karta</th><th>Daraja</th><th style="text-align:right">Balans</th></tr></thead>
+          <tbody id="loyRows"></tbody>
+        </table></div>
+        <div class="small" id="loyMore" style="margin-top:8px"></div>
+      </div>
+      <div>
+        <div class="card" id="loySettings"></div>
+        <div class="card"><h2>Oxirgi harakatlar</h2><div id="loyRecent"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ JURNAL (direktor va super admin) ============ -->
+  <div id="vLog" class="hidden">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+        <div><h2 style="margin:0">Faollik jurnali</h2><div class="hint">Kim, qachon, nima qilgani. Oxirgi 300 ta yozuv.</div></div>
+        <div class="field hidden" id="logFilterWrap" style="margin:0;min-width:220px"><label for="logFilter">Servis bo'yicha</label><select id="logFilter"></select></div>
+      </div>
+      <div id="logList" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- ============ SUPER ADMIN: SERVISLAR ============ -->
+  <div id="vSuper" class="hidden">
+    <div class="tiles" id="sTiles"></div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <h2 style="margin:0">Avtoservislar</h2>
+        <button class="btn-sm" id="cAddToggle" type="button">+ Servis qo'shish</button>
+      </div>
+      <div class="hint" style="margin-top:6px">Avval muammoli servislar. «Faol emas» — 14 kundan beri hech narsa kiritmagan. «Ishlatmayapti» — qo'shilgandan beri bitta ham ish kiritmagan.</div>
+      <div id="cMsg" class="msg" style="margin-top:12px"></div>
+      <form id="cForm" class="hidden" novalidate style="border:1px dashed var(--line);border-radius:12px;padding:14px;margin-top:14px">
+        <div class="row">
+          <div class="field"><label for="cName">Servis nomi</label><input id="cName" maxlength="100" placeholder="Masalan: Avto Lider"></div>
+          <div class="field"><label for="cPhone">Telefon</label><input id="cPhone" type="tel" placeholder="+998 71 200 00 00"></div>
+        </div>
+        <div class="field"><label for="cAddr">Manzil</label><input id="cAddr" maxlength="200" placeholder="Toshkent, Chilonzor 9-kvartal"></div>
+        <div class="field"><label for="cDir">Direktor ismi</label><input id="cDir" maxlength="80" placeholder="Ism Familiya"></div>
+        <div class="row">
+          <div class="field"><label for="cUser">Direktor logini</label><input id="cUser" maxlength="40" autocomplete="off" placeholder="avtolider"></div>
+          <div class="field"><label for="cPass">Parol</label><input id="cPass" type="text" autocomplete="off" placeholder="kamida 8 belgi"></div>
+        </div>
+        <div class="hint" style="margin-bottom:12px">Direktor kirib, administrator va ustalarni o'zi qo'shadi.</div>
+        <button type="submit">Qo'shish</button>
+      </form>
+      <div id="centers" style="margin-top:14px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const pad = (n) => String(n).padStart(2, '0');
+  const iso = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const fmt = (s) => { if (!s) return ''; const [y, m, d] = s.slice(0, 10).split('-'); return d + '.' + m + '.' + y; };
+  const fmtTime = (s) => { const d = new Date(s); return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+  const parse = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  const show = (id, on) => $(id).classList.toggle('hidden', !on);
+
+  const TABS = {
+    SUPER_ADMIN:   [['super', 'Avtoservislar'], ['customers', 'Mijozlar'], ['log', 'Faollik jurnali']],
+    DIRECTOR:      [['home', 'Bosh sahifa'], ['work', 'Ishlar'], ['customers', 'Mijozlar bazasi'], ['debts', 'Qarz daftari'], ['loyalty', '🎁 Sadoqat'], ['staff', 'Xodimlar'], ['log', 'Faollik jurnali']],
+    ADMINISTRATOR: [['home', 'Bosh sahifa'], ['work', 'Ishlar'], ['customers', 'Mijozlar bazasi'], ['debts', 'Qarz daftari'], ['loyalty', '🎁 Sadoqat']],
+    MASTER:        [['work', 'Ish kiritish']]
+  };
+  const VIEWS = { home: 'vHome', work: 'vWork', customers: 'vCustomers', debts: 'vDebts', staff: 'vStaff', log: 'vLog', super: 'vSuper', profile: 'vProfile', loyalty: 'vLoyalty' };
+
+  let token = null, me = null, tab = null, carExists = null, lookupTimer = null, typesLoaded = false;
+  let lookupLoy = null, loyLevel = '', loyTimer = null, profLoy = null, adjOpen = false, payLoy = null;
+  try { token = localStorage.getItem('carcare:admin'); } catch (e) {}
+
+  async function api(path, opts = {}) {
+    const res = await fetch('/api/admin' + path, {
+      ...opts,
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) }
+    });
+    if (res.status === 204) return null;
+    const body = await res.json().catch(() => ({}));
+    if ((res.status === 401 || res.status === 403) && path !== '/login' && path !== '/me' && !path.startsWith('/password')) {
+      if (res.status === 401) { setToken(null); start(); }
+    }
+    if (!res.ok) throw new Error(body.error || 'Xatolik');
+    return body;
+  }
+  function setToken(t) {
+    token = t;
+    try { t ? localStorage.setItem('carcare:admin', t) : localStorage.removeItem('carcare:admin'); } catch (e) {}
+  }
+  function flash(id, text, type) { const m = $(id); m.textContent = text; m.className = 'msg show ' + (type || 'ok'); }
+  function daysPill(d) {
+    if (d < 0) return '<span class="pill bad">' + (-d) + ' kun o\'tdi</span>';
+    if (d === 0) return '<span class="pill bad">Bugun</span>';
+    if (d <= 7) return '<span class="pill warn">' + d + ' kun qoldi</span>';
+    return '<span class="pill ok">' + d + ' kun qoldi</span>';
+  }
+  const tgBadge = (on) => '<span class="tg-badge ' + (on ? 'on' : 'off') + '">' + (on ? 'Telegram ✓' : 'Telegram yo\'q') + '</span>';
+  const telLink = (phone, display) => phone ? '<a class="tel" href="tel:+' + esc(phone) + '">📞 ' + esc(display) + '</a>' : '';
+  const canContact = () => me && (me.role === 'DIRECTOR' || me.role === 'ADMINISTRATOR');
+
+  // ================= KIRISH VA BO'LIMLAR =================
+  async function start() {
+    ['vLogin', 'vTop', 'pwCard', 'tabs', 'vWork', 'vCustomers', 'vDebts', 'vStaff', 'vLog', 'vSuper', 'vProfile', 'vHome', 'vLoyalty', 'payModal', 'msgModal', 'addCustCard'].forEach(v => show(v, false));
+    loyLevel = ''; $('loyQ').value = ''; lookupLoy = null;
+    debtFilter = 'ALL'; debtPeriod = 'ALL'; $('debtQ').value = '';
+    custFilter = 'ALL'; $('custQ').value = ''; $('logFilter').innerHTML = '';
+    if (!token) { show('vLogin', true); return; }
+    try {
+      me = await api('/me');
+    } catch (e) { setToken(null); show('vLogin', true); flash('loginMsg', e.message, 'err'); return; }
+    show('vTop', true);
+    $('topTitle').textContent = me.role === 'SUPER_ADMIN' ? 'Super admin' : me.centerName;
+    $('who').textContent = me.fullName + ' · ' + me.roleLabel;
+    const tabs = TABS[me.role] || [];
+    $('tabs').innerHTML = tabs.map(([k, l]) => '<button type="button" data-tab="' + k + '">' + l + '</button>').join('');
+    show('tabs', tabs.length > 1);
+    openTab(tabs[0][0]);
+  }
+
+  function openTab(k) {
+    tab = k;
+    Object.values(VIEWS).forEach(v => show(v, false));
+    show(VIEWS[k], true);
+    document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === k)));
+    if (k === 'work') { initWork(); loadWork(); }
+    if (k === 'customers') initCustomers();
+    if (k === 'debts') loadDebts();
+    if (k === 'home') loadHome();
+    if (k === 'staff') loadStaff();
+    if (k === 'log') loadLog();
+    if (k === 'super') loadSuper();
+    if (k === 'loyalty') loadLoyalty();
+  }
+
+  $('loginForm').onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const r = await api('/login', { method: 'POST', body: JSON.stringify({ username: $('lu').value, password: $('lp').value }) });
+      setToken(r.token); $('lp').value = ''; $('loginMsg').className = 'msg';
+      start();
+    } catch (err) { flash('loginMsg', err.message, 'err'); }
+  };
+  $('logout').onclick = async () => { try { await api('/logout', { method: 'POST' }); } catch (e) {} setToken(null); start(); };
+  $('pwToggle').onclick = () => $('pwCard').classList.toggle('hidden');
+  $('pwForm').onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api('/password', { method: 'POST', body: JSON.stringify({ oldPassword: $('pwOld').value, newPassword: $('pwNew').value }) });
+      $('pwOld').value = $('pwNew').value = '';
+      flash('pwMsg', 'Parol o\'zgartirildi');
+    } catch (err) { flash('pwMsg', err.message, 'err'); }
+  };
+
+  // ================= ISHLAR =================
+  async function initWork() {
+    const master = me.role === 'MASTER';
+    show('masterWrap', !master);
+    show('readyWrap', !master);
+    show('masterHint', master);
+    show('moneyWrap', !master);
+    show('callCard', !master);
+    $('recentTitle').textContent = master ? 'Mening ishlarim' : 'Oxirgi ishlar';
+    if (typesLoaded) return;
+    typesLoaded = true;
+    const types = await fetch('/api/service-types').then(r => r.json());
+    $('rType').innerHTML = types.map(t => '<option value="' + t.code + '">' + esc(t.label) + '</option>').join('');
+    resetForm();
+  }
+
+  function resetForm() {
+    const today = new Date();
+    const keepMaster = $('rMaster').value;
+    $('recForm').reset();
+    $('rPh').value = '+998 ';
+    $('rDone').value = iso(today); $('rDone').max = iso(today);
+    const n = new Date(today); n.setMonth(n.getMonth() + 6); $('rNext').value = iso(n);
+    $('rReady').checked = true;
+    $('rDue').value = plusDays(7); $('rDue').min = iso(today);
+    $('rDisc').checked = true; $('rBonus').value = '';
+    lookupLoy = null; renderLoyWork();
+    if (keepMaster) $('rMaster').value = keepMaster;
+    show('ownerBox', false); show('newOwner', false); show('rCustomWrap', false);
+    carExists = null;
+  }
+
+  $('rType').onchange = () => show('rCustomWrap', $('rType').value === 'OTHER');
+  document.querySelectorAll('#recForm .chip').forEach(ch => ch.onclick = () => {
+    const b = $('rDone').value ? parse($('rDone').value) : new Date();
+    b.setMonth(b.getMonth() + Number(ch.dataset.m));
+    $('rNext').value = iso(b);
+  });
+  $('rPlate').addEventListener('input', () => {
+    clearTimeout(lookupTimer);
+    const v = $('rPlate').value.replace(/[^a-zA-Z0-9]/g, '');
+    if (v.length < 6) { show('ownerBox', false); show('newOwner', false); carExists = null; lookupLoy = null; renderLoyWork(); return; }
+    lookupTimer = setTimeout(lookup, 400);
+  });
+
+  async function lookup() {
+    try {
+      const c = await api('/center/lookup?plate=' + encodeURIComponent($('rPlate').value));
+      carExists = c.exists;
+      lookupLoy = c.loyalty || null;
+      renderLoyWork();
+      if (c.exists) {
+        $('ownerBox').innerHTML = '<div class="ownerbox"><b>' + esc(c.firstName + ' ' + c.lastName) + '</b>' + (c.phoneDisplay ? ' · ' + esc(c.phoneDisplay) : '') + ' ' + tgBadge(c.telegramConnected) +
+          (c.activeServices.length ? '<div class="small" style="margin-top:6px">Hozirgi servislar: ' + c.activeServices.map(esc).join('; ') + '</div>' : '') + '</div>' +
+          (c.blacklistReason ? '<div class="msg show err" style="margin-top:8px">⛔ <b>Qora ro\'yxatda:</b> ' + esc(c.blacklistReason) + '</div>' : '');
+        show('ownerBox', true); show('newOwner', false);
+      } else { show('ownerBox', false); show('newOwner', true); }
+    } catch (err) { show('ownerBox', false); show('newOwner', false); carExists = null; lookupLoy = null; renderLoyWork(); }
+  }
+
+  $('recForm').onsubmit = async (e) => {
+    e.preventDefault();
+    if (carExists === null) await lookup();
+    const master = me.role === 'MASTER';
+    const body = {
+      plateNumber: $('rPlate').value,
+      firstName: $('rFn').value || null, lastName: $('rLn').value || null, phone: $('rPh').value || null,
+      type: $('rType').value, customName: $('rCustom').value || null,
+      doneDate: $('rDone').value || null, nextDate: $('rNext').value || null,
+      mileage: $('rKm').value ? Number($('rKm').value) : null, nextMileage: null,
+      note: $('rNote').value || null,
+      masterId: !master && $('rMaster').value ? Number($('rMaster').value) : null,
+      notifyReady: !master && $('rReady').checked,
+      price: master ? null : num($('rPrice').value),
+      paid: master || $('rPaid').value.trim() === '' ? null : num($('rPaid').value),
+      paymentMethod: $('rMethod').value,
+      payDueDate: !master && !$('dueWrap').classList.contains('hidden') ? ($('rDue').value || null) : null,
+      applyDiscount: master ? null : $('rDisc').checked,
+      bonus: master || $('rBonusWrap').classList.contains('hidden') || $('loyWrap').classList.contains('hidden') ? null : (num($('rBonus').value) || null)
+    };
+    $('rSave').disabled = true;
+    try {
+      const r = await api('/center/records', { method: 'POST', body: JSON.stringify(body) });
+      const rec = r.record, warn = r.readyDelivered === false;
+      let html = '<div class="result ' + (warn ? 'warn' : 'ok') + '">' + esc(r.message);
+      if (warn) html += '<div class="btns">' + telLink(rec.phone, rec.phoneDisplay) + '</div>';
+      if (r.carCreated && rec.carUrl) html += '<div class="btns"><span class="small">Mijoz sahifasi:</span> <button class="btn-ghost btn-sm" type="button" data-copy="' + esc(rec.carUrl) + '">Havolani nusxalash</button></div>';
+      $('saveResult').innerHTML = html + '</div>';
+      resetForm();
+      loadWork();
+    } catch (err) { $('saveResult').innerHTML = '<div class="result warn">' + esc(err.message) + '</div>'; }
+    $('rSave').disabled = false;
+  };
+
+  async function loadWork() {
+    try {
+      const d = await api('/center/dashboard');
+      const master = me.role === 'MASTER';
+      // Ustalar ro'yxati (direktor va administrator uchun)
+      if (!master) {
+        const cur = $('rMaster').value;
+        $('rMaster').innerHTML = '<option value="">' + esc(me.fullName) + ' (o\'zim)</option>' +
+          d.masters.map(m => '<option value="' + m.id + '">' + esc(m.fullName) + '</option>').join('');
+        if (cur) $('rMaster').value = cur;
+      }
+      const s = d.stats;
+      $('cTiles').innerHTML = s ? [
+        [s.last30Days, 'Oxirgi 30 kunda ish'], [s.customers, 'Mijozlar'],
+        [s.returnRatePct == null ? '—' : s.returnRatePct + '%', 'Qaytib kelganlar'],
+        [s.telegramConnected + ' / ' + s.customers, 'Telegram ulangan']
+      ].map(([v, l]) => '<div class="tile"><b>' + esc(v) + '</b><span>' + l + '</span></div>').join('') : '';
+      show('cTiles', !!s);
+
+      $('callList').innerHTML = d.callList.length ? d.callList.map(r =>
+        '<div class="item"><div class="item-top"><div><div class="item-title">' + esc(r.plateDisplay) + ' · ' + esc(r.ownerName) + '</div>' +
+        '<div class="small">' + esc(r.serviceName) + ' · ' + fmt(r.nextDate) + '</div></div>' + daysPill(r.daysLeft) + '</div>' +
+        '<div class="btns">' + telLink(r.phone, r.phoneDisplay) + tgBadge(r.telegramConnected) + '</div></div>').join('')
+        : '<div class="empty">Hozircha qo\'ng\'iroq qilinadigan mijoz yo\'q</div>';
+
+      $('recent').innerHTML = d.recent.length ? d.recent.map(r =>
+        '<div class="item"><div class="item-top"><div><div class="item-title">' + esc(r.plateDisplay) + ' · ' + esc(r.serviceName) + '</div>' +
+        '<div class="small">' + (master ? '' : esc(r.ownerName) + ' · ') + 'bajarildi ' + fmt(r.doneDate) + ' · keyingisi ' + fmt(r.nextDate) +
+        (r.masterName ? ' · usta: ' + esc(r.masterName) : '') + (r.note ? ' · ' + esc(r.note) : '') + '</div></div>' +
+        (r.active ? '' : '<span class="pill grey">Yangilangan</span>') + '</div>' +
+        (master ? '' : r.price == null
+          ? '<div class="btns"><span class="small">Narx kiritilmagan</span><button class="btn-ghost btn-sm" type="button" data-setprice="' + r.id + '" data-car="' + (r.carId || '') + '" data-label="' + esc(r.plateDisplay + ' · ' + r.serviceName) + '">Narx qo\'yish</button></div>'
+          : '<div class="small" style="margin-top:6px">Narx: <b>' + sum(r.price) + '</b>' + (r.discount > 0 ? ' (chegirma −' + sum(r.discount) + ')' : '') + ' · to\'langan: ' + sum(r.paid) + (r.bonusPaid > 0 ? ' (shundan ball ' + sum(r.bonusPaid) + ')' : '') +
+            (r.remaining > 0 ? ' · <b style="color:var(--bad)">qarz ' + sum(r.remaining) + '</b> (muddat ' + fmt(r.payDueDate) + ') ' +
+              '<button class="btn-sm" type="button" data-pay="' + r.id + '" data-car="' + (r.carId || '') + '" data-rem="' + r.remaining + '" data-label="' + esc(r.plateDisplay + ' · ' + r.serviceName + ' · ' + r.ownerName) + '">💵 To\'lov</button>' : ' · to\'liq to\'langan') + '</div>') +
+        (master ? '' : '<div class="btns">' +
+          (r.telegramConnected ? '<button class="btn-tg btn-sm" type="button" data-ready="' + r.id + '">✅ Tayyor, keling</button>' : '<span class="small">Telegram ulanmagan — qo\'ng\'iroq qiling</span>') +
+          telLink(r.phone, r.phoneDisplay) +
+          (r.readyNotifiedAt ? '<span class="small">Xabar yuborilgan: ' + esc(fmtTime(r.readyNotifiedAt)) + '</span>' : '') + '</div>') +
+        '</div>').join('') : '<div class="empty">Hali ish kiritilmagan</div>';
+    } catch (err) { }
+  }
+
+  // ================= DIREKTOR: XODIMLAR =================
+  async function loadStaff() {
+    try {
+      const list = await api('/center/staff');
+      $('staffRows').innerHTML = list.map(s =>
+        '<tr><td><b>' + esc(s.fullName) + '</b></td><td>' + esc(s.roleLabel) + '</td><td>' + esc(s.username) + '</td>' +
+        '<td><span class="pill ' + (s.blocked ? 'grey' : 'ok') + '">' + (s.blocked ? 'Bloklangan' : 'Faol') + '</span></td>' +
+        '<td style="text-align:right;white-space:nowrap">' + (s.role === 'DIRECTOR' ? '<span class="small">Direktor</span>' :
+          '<button class="btn-ghost btn-sm" type="button" data-block="' + s.id + '" data-to="' + (!s.blocked) + '">' + (s.blocked ? 'Faollashtirish' : 'Bloklash') + '</button> ' +
+          '<button class="btn-ghost btn-sm" type="button" data-spw="' + s.id + '">Parol</button>') + '</td></tr>' +
+        '<tr class="hidden" id="spw-' + s.id + '"><td colspan="5"><div class="inline"><input type="text" placeholder="Yangi parol, kamida 8 belgi" autocomplete="off"><button class="btn-sm" type="button" data-spwsave="' + s.id + '">Saqlash</button></div></td></tr>'
+      ).join('');
+    } catch (err) { flash('staffMsg', err.message, 'err'); }
+  }
+  $('staffForm').onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api('/center/staff', { method: 'POST', body: JSON.stringify({ fullName: $('sfName').value, role: $('sfRole').value, username: $('sfUser').value, password: $('sfPass').value }) });
+      flash('sfMsg', 'Xodim qo\'shildi. Login va parolni unga bering.');
+      $('staffForm').reset();
+      loadStaff();
+    } catch (err) { flash('sfMsg', err.message, 'err'); }
+  };
+
+  // ================= PUL: yordamchilar =================
+  const num = (s) => { const d = String(s ?? '').replace(/\D/g, ''); return d ? Number(d) : null; };
+  const sum = (n) => Number(n || 0).toLocaleString('ru-RU').replace(/\u00a0/g, ' ') + ' so\'m';
+  const group = (el) => { const n = num(el.value); el.value = n == null ? '' : n.toLocaleString('ru-RU').replace(/\u00a0/g, ' '); };
+  const plusDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return iso(d); };
+
+  const pts = (n) => sum(n).replace(" so'm", ' ball');
+  const floorPct = (amount, pct) => amount > 0 && pct > 0 ? Math.floor(amount * pct / 100) : 0;
+
+  /** Ish formasidagi sadoqat bloki (mashina raqami yozilganda). */
+  function renderLoyWork() {
+    const L = lookupLoy;
+    const visible = !!L && me && me.role !== 'MASTER' && (L.programEnabled || L.cardDisplay);
+    show('loyWrap', visible);
+    if (!visible) { updateDebtHint(); return; }
+    const lvl = '<span class="lvl ' + esc(L.level) + '">' + esc(L.levelIcon + ' ' + L.levelLabel) + '</span>';
+    let info;
+    if (!L.programEnabled) info = '💳 Karta ' + esc(L.cardDisplay) + ' · balans <b>' + pts(L.balance) + '</b><div class="small">Sadoqat dasturi to\'xtatilgan — ball yozilmaydi va ishlatilmaydi.</div>';
+    else if (L.blacklisted) info = '⛔ <b>Qora ro\'yxatda</b> — ball yozilmaydi, chegirma berilmaydi.' + (L.cardDisplay ? '<div class="small">Karta ' + esc(L.cardDisplay) + ' · balans ' + pts(L.balance) + '</div>' : '');
+    else if (L.willOpen) info = '💳 <b>Jamg\'arma karta ochiladi</b> ' + lvl + (L.welcomeBonus > 0 ? ' · sovg\'a <b>+' + pts(L.welcomeBonus) + '</b>' : '') + '<div class="small">Har to\'lovdan ' + L.cashbackPct + '% ball qaytadi' + (L.discountPct > 0 ? ', chegirma ' + L.discountPct + '%' : '') + '</div>';
+    else info = '💳 ' + lvl + ' · karta ' + esc(L.cardDisplay) + ' · balans <b>' + pts(L.balance) + '</b><div class="small">Keshbek ' + L.cashbackPct + '%' + (L.discountPct > 0 ? ' · chegirma ' + L.discountPct + '%' : '') + ' · ball bilan narxning ' + L.maxRedeemPct + '% gacha to\'lash mumkin</div>';
+    $('loyInfo').innerHTML = info;
+    const usable = L.programEnabled;
+    show('rDiscWrap', usable && L.discountPct > 0);
+    $('rDiscLbl').textContent = 'Sadoqat chegirmasi ' + L.discountPct + '% ni qo\'llash';
+    const avail = L.willOpen ? L.welcomeBonus : L.balance;
+    show('rBonusWrap', usable && avail > 0 && L.maxRedeemPct > 0);
+    updateDebtHint();
+  }
+
+  /** Narx, chegirma, ball va to'lov hisobi — server bilan bir xil qoidalar. */
+  function moneyCalc() {
+    const L = lookupLoy, list = num($('rPrice').value);
+    const loyOn = !!L && L.programEnabled && !$('loyWrap').classList.contains('hidden');
+    const pct = loyOn && !$('rDiscWrap').classList.contains('hidden') && $('rDisc').checked ? L.discountPct : 0;
+    const disc = list ? floorPct(list, pct) : 0;
+    const fin = list ? list - disc : null;
+    const bonusOn = loyOn && !$('rBonusWrap').classList.contains('hidden');
+    const avail = bonusOn ? (L.willOpen ? L.welcomeBonus : L.balance) : 0;
+    const cap = fin && bonusOn ? Math.min(avail, floorPct(fin, L.maxRedeemPct)) : 0;
+    const bonus = bonusOn ? (num($('rBonus').value) || 0) : 0;
+    const paidRaw = $('rPaid').value.trim() === '' ? null : num($('rPaid').value);
+    const paid = fin == null ? 0 : paidRaw == null ? Math.max(0, fin - bonus) : paidRaw;
+    return { list, pct, disc, fin, avail, cap, bonus, paid, debt: fin == null ? 0 : fin - bonus - paid, bonusOn };
+  }
+
+  function updateDebtHint() {
+    const m = moneyCalc();
+    show('dueWrap', m.debt > 0);
+    $('rPriceLbl').textContent = m.pct > 0 ? 'Narxi (chegirmagacha), so\'m' : 'Narxi, so\'m';
+    if (m.bonusOn) {
+      $('rBonusHint').innerHTML = 'Mavjud: ' + pts(m.avail) + (m.fin ? ' · bu ishda ko\'pi bilan <b>' + sum(m.cap) + '</b> (narxning ' + lookupLoy.maxRedeemPct + '%)' : '') +
+        (m.bonus > m.cap && m.fin ? '<div style="color:var(--bad);font-weight:700">Ball bilan ' + sum(m.cap) + ' dan ko\'p to\'lab bo\'lmaydi</div>' : '');
+    }
+    const lines = [];
+    if (m.fin && m.disc > 0) lines.push('Chegirma ' + m.pct + '%: −' + sum(m.disc) + ' → <b>to\'lanadi ' + sum(m.fin) + '</b>');
+    if (m.fin && m.bonus > 0) lines.push('Ball bilan: ' + sum(m.bonus) + ', pul bilan: ' + sum(m.paid));
+    $('debtHint').innerHTML = (lines.length ? lines.join('<br>') + '<br>' : '') + (!m.list ? 'Narx kiritilmasa, ish narxsiz saqlanadi (keyin «Narx qo\'yish» mumkin).'
+      : m.debt > 0 ? '<b style="color:var(--bad)">Qarzga yoziladi: ' + sum(m.debt) + '</b>'
+      : m.debt < 0 ? '<b style="color:var(--bad)">To\'lov va ball birgalikda narxdan oshib ketdi</b>'
+      : 'To\'liq to\'landi');
+  }
+  $('rDisc').addEventListener('change', updateDebtHint);
+  $('rBonus').addEventListener('input', () => { group($('rBonus')); updateDebtHint(); });
+  $('rBonusMax').onclick = () => {
+    const m = moneyCalc();
+    $('rBonus').value = m.cap ? m.cap.toLocaleString('ru-RU').replace(/\u00a0/g, ' ') : '';
+    updateDebtHint();
+  };
+  $('rPrice').addEventListener('input', () => { group($('rPrice')); updateDebtHint(); });
+  $('rPaid').addEventListener('input', () => { group($('rPaid')); updateDebtHint(); });
+
+  // ================= QARZ DAFTARI =================
+  const PERIODS = [['ALL', 'Barchasi'], ['YEAR', 'Joriy yil'], ['MONTH', 'Joriy oy'], ['WEEK', 'Joriy hafta'], ['TODAY', 'Bugun']];
+  const DFILTERS = [['ALL', 'Hammasi'], ['OVERDUE', 'Muddati o\'tgan'], ['UNPAID', 'To\'lanmagan'], ['PARTIAL', 'Qisman to\'langan'], ['PAID', 'To\'langan']];
+  let debtFilter = 'ALL', debtPeriod = 'ALL', debtTimer = null, payCtx = null;
+  const chipStyle = (on) => on ? 'background:var(--brand);color:var(--brand-ink);border-color:var(--brand)' : '';
+
+  function debtPill(r) {
+    if (r.status === 'PAID') return '<span class="pill ok">To\'langan</span>';
+    if (r.overdueDays > 0) return '<span class="pill bad">Muddati o\'tgan · ' + r.overdueDays + ' kun</span>';
+    return '<span class="pill warn">' + (r.status === 'PARTIAL' ? 'Qisman · muddatida' : 'Muddatida') + '</span>';
+  }
+
+  async function loadDebts() {
+    $('debtPeriods').innerHTML = PERIODS.map(([k, l]) => '<button type="button" class="chip" data-dperiod="' + k + '" aria-pressed="' + (k === debtPeriod) + '" style="' + chipStyle(k === debtPeriod) + '">' + l + '</button>').join('');
+    const q = $('debtQ').value.trim();
+    try {
+      const d = await api('/center/debts?filter=' + debtFilter + '&period=' + debtPeriod + (q ? '&q=' + encodeURIComponent(q) : ''));
+      const s = d.summary;
+      $('debtTiles').innerHTML =
+        '<div class="tile"><span>Qarzdorlar soni</span><b>' + s.debtors + ' <small style="font-size:14px">mijoz</small></b>' +
+        '<div class="kv"><span>Muddati o\'tgan</span><strong style="color:var(--bad)">' + s.overdue + '</strong></div>' +
+        '<div class="kv"><span>To\'lanmagan</span><strong>' + s.unpaid + '</strong></div>' +
+        '<div class="kv"><span>Qisman to\'langan</span><strong>' + s.partial + '</strong></div>' +
+        '<div class="kv"><span>To\'langan</span><strong>' + s.paid + '</strong></div></div>' +
+        '<div class="tile"><span>Qarzlar summasi</span><b style="color:var(--bad)">' + sum(s.totalDebt) + '</b></div>' +
+        '<div class="tile"><span>To\'lovlar summasi</span><b style="color:var(--ok)">' + sum(s.totalPaid) + '</b></div>' +
+        '<div class="tile"><span>Qarzlar qoldig\'i</span><b>' + sum(s.totalRemaining) + '</b></div>';
+      $('debtFilters').innerHTML = DFILTERS.map(([k, l]) => '<button type="button" class="chip" data-dfilter="' + k + '" aria-pressed="' + (k === debtFilter) + '" style="' + chipStyle(k === debtFilter) + '">' + l + ' · ' + (d.counts[k] ?? 0) + '</button>').join('');
+      $('debtRows').innerHTML = d.rows.length ? d.rows.map(r =>
+        '<tr><td><button type="button" data-profile="' + r.carId + '" style="background:none;border:0;padding:0;color:var(--brand);font-weight:800;text-align:left">' + esc(r.ownerName) + '</button><div class="small">' + esc(r.plateDisplay) + ' · ' + esc(r.phoneDisplay) + '</div></td>' +
+        '<td>' + esc(r.serviceName) + '<div class="small">' + fmt(r.doneDate) + '</div></td>' +
+        '<td style="text-align:right;color:var(--bad);font-weight:700;white-space:nowrap">' + sum(r.price) + '</td>' +
+        '<td style="text-align:right;color:var(--ok);white-space:nowrap">' + sum(r.paid) + '</td>' +
+        '<td style="text-align:right;font-weight:700;white-space:nowrap">' + sum(r.remaining) + '</td>' +
+        '<td>' + debtPill(r) + '</td><td>' + fmt(r.payDueDate) + '</td>' +
+        '<td style="text-align:right">' + (r.remaining > 0
+          ? '<button class="btn-sm" type="button" data-pay="' + r.recordId + '" data-car="' + r.carId + '" data-rem="' + r.remaining + '" data-label="' + esc(r.plateDisplay + ' · ' + r.serviceName + ' · ' + r.ownerName) + '">💵 To\'lash</button>'
+          : '<button class="btn-ghost btn-sm" type="button" data-pay="' + r.recordId + '" data-rem="0" data-label="' + esc(r.plateDisplay + ' · ' + r.serviceName + ' · ' + r.ownerName) + '">Tarix</button>') + '</td></tr>').join('')
+        : '<tr><td colspan="8" class="empty">Qarz topilmadi</td></tr>';
+      $('debtMore').textContent = d.total > d.rows.length ? d.total + ' tadan ' + d.rows.length + ' tasi ko\'rsatildi' : d.total + ' ta yozuv';
+    } catch (err) { flash('debtMsg', err.message, 'err'); }
+  }
+  $('debtQ').addEventListener('input', () => { clearTimeout(debtTimer); debtTimer = setTimeout(loadDebts, 350); });
+
+  // ---------- To'lov / narx oynasi ----------
+  const METHODS = [['CASH', 'Naqd'], ['CARD', 'Karta'], ['TRANSFER', 'O\'tkazma']];
+  function setPayMethods(withBonus) {
+    $('payMethod').innerHTML = METHODS.concat(withBonus ? [['BONUS', '🎁 Bonus ball']] : [])
+      .map(([k, l]) => '<option value="' + k + '">' + l + '</option>').join('');
+    updatePayHint();
+  }
+  function updatePayHint() {
+    const c = payLoy && payLoy.card;
+    $('payBonusHint').innerHTML = $('payMethod').value === 'BONUS' && c
+      ? 'Kartada: <b>' + pts(c.balance) + '</b>. Har bir ish narxining ' + payLoy.maxRedeemPct + '% gacha ball bilan to\'lash mumkin. Balldan keshbek yozilmaydi.' : '';
+  }
+  $('payMethod').addEventListener('change', updatePayHint);
+
+  /** carId — sadoqat kartasini tekshirish uchun (bonus bilan to'lov, chegirma). */
+  async function openPay(id, remaining, label, mode, carId) {
+    payCtx = { id, remaining, mode };
+    payLoy = null;
+    const price = mode === 'price';
+    $('payTitle').textContent = price ? 'Narx qo\'yish' : remaining > 0 ? 'To\'lov qabul qilish' : 'To\'lovlar tarixi';
+    $('payInfo').innerHTML = esc(label) + (!price && remaining > 0 ? '<br>Qarz qoldig\'i: <b>' + sum(remaining) + '</b>' : '');
+    $('payMsg').className = 'msg';
+    $('payAmountLbl').textContent = price ? 'Narx, so\'m' : 'Summa, so\'m';
+    $('payAmount').value = !price && remaining > 0 ? remaining.toLocaleString('ru-RU').replace(/\u00a0/g, ' ') : '';
+    $('payNote').value = '';
+    $('payDue').value = plusDays(7);
+    show('payForm', price || remaining > 0);
+    show('payMethodWrap', !price); show('payNoteWrap', !price); show('payDueWrap', price);
+    show('payDiscWrap', false); $('payDisc').checked = true;
+    setPayMethods(false);
+    $('payHistory').innerHTML = '';
+    show('payModal', true);
+    $('payAmount').focus();
+    if (carId && (price || remaining > 0)) {
+      try {
+        const L = await api('/center/customers/' + carId + '/loyalty');
+        if (!payCtx || payCtx.id !== id) return;
+        payLoy = L;
+        const c = L.card;
+        if (!price && L.programEnabled && c && c.balance > 0 && L.maxRedeemPct > 0) setPayMethods(true);
+        if (price && L.programEnabled && !L.blacklisted && c && c.discountPct > 0) {
+          $('payDiscLbl').textContent = 'Sadoqat chegirmasi ' + c.discountPct + '% (' + c.levelIcon + ' ' + c.levelLabel + ') — narxdan ayiriladi';
+          show('payDiscWrap', true);
+        }
+      } catch (err) { }
+    }
+    if (!price && mode !== 'customer') {
+      try {
+        const list = await api('/center/records/' + id + '/payments');
+        $('payHistory').innerHTML = '<div style="font-weight:700;margin-bottom:6px">To\'lovlar tarixi</div>' + (list.length ? list.map(p =>
+          '<div class="logrow"><time>' + esc(fmtTime(p.createdAt)) + '</time><div><b>' + sum(p.amount) + '</b> <span class="meta">· ' + esc(p.methodLabel) + ' · ' + esc(p.receivedBy || '') + '</span>' +
+          (p.note ? '<div class="small">' + esc(p.note) + '</div>' : '') + '</div></div>').join('') : '<div class="empty">Hali to\'lov yo\'q</div>');
+      } catch (err) { }
+    }
+  }
+  function closePay() { show('payModal', false); payCtx = null; payLoy = null; }
+  $('payClose').onclick = closePay;
+  $('payModal').addEventListener('click', (e) => { if (e.target.id === 'payModal') closePay(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && payCtx) closePay(); });
+  $('payAmount').addEventListener('input', () => group($('payAmount')));
+
+  $('payForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const amount = num($('payAmount').value);
+    $('paySave').disabled = true;
+    try {
+      if (payCtx.mode === 'customer') {
+        await api('/center/customers/' + payCtx.id + '/pay', { method: 'POST', body: JSON.stringify({ amount, method: $('payMethod').value, note: $('payNote').value || null }) });
+      } else if (payCtx.mode === 'price') {
+        await api('/center/records/' + payCtx.id + '/price', { method: 'PATCH', body: JSON.stringify({ price: amount, payDueDate: $('payDue').value || null,
+          applyDiscount: $('payDiscWrap').classList.contains('hidden') ? null : $('payDisc').checked }) });
+      } else {
+        await api('/center/records/' + payCtx.id + '/payments', { method: 'POST', body: JSON.stringify({ amount, method: $('payMethod').value, note: $('payNote').value || null }) });
+      }
+      closePay();
+      if (tab === 'debts') loadDebts();
+      if (tab === 'work') loadWork();
+      if (tab === 'profile' && openCust) openProfile(openCust);
+      if (tab === 'loyalty') loadLoyalty();
+    } catch (err) { flash('payMsg', err.message, 'err'); }
+    $('paySave').disabled = false;
+  };
+
+  // ================= BOSH SAHIFA =================
+  const MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+
+  async function loadHome() {
+    try {
+      const h = await api('/center/home');
+      const monthName = MONTHS[Number(h.today.slice(5, 7)) - 1];
+      $('homeMonth').textContent = '· ' + monthName;
+      $('homeTiles').innerHTML =
+        '<div class="tile"><span>Bugungi ishlar</span><b>' + h.jobsToday + '</b><div class="small">Shu oy: ' + h.jobsMonth + ' ta</div></div>' +
+        '<div class="tile"><span>Bugungi tushum</span><b style="color:var(--ok)">' + sum(h.revenueToday) + '</b><div class="small">Shu oy: ' + sum(h.revenueMonth) + '</div></div>' +
+        '<div class="tile"><span>Qarzlar qoldig\'i</span><b style="color:var(--bad)">' + sum(h.debtRemaining) + '</b><div class="small">' + h.debtors + ' qarzdor, ' + h.overdueDebtors + ' tasi muddati o\'tgan</div></div>' +
+        '<div class="tile"><span>7 kun ichida keladi</span><b>' + h.upcoming7 + '</b><div class="small">Qo\'ng\'iroq ro\'yxatida</div></div>';
+      $('homeChart').innerHTML = revenueChart(h.days);
+      $('homeCust').innerHTML =
+        homeRow('👥', 'Barcha mijozlar', h.customersTotal + ' ta', 'customers', 'ALL') +
+        homeRow('🆕', 'Shu oy yangi mijozlar', h.customersNewMonth + ' ta', 'customers', 'NEW') +
+        homeRow('💳', 'Qarzdorlar', h.debtors + ' ta · ' + sum(h.debtRemaining), 'debts', null) +
+        homeRow('🎂', 'Shu oy tug\'ilganlar', h.birthdays.length + ' ta', 'customers', 'BIRTHDAY');
+      $('homeDebtors').innerHTML = h.topDebtors.length ? h.topDebtors.map(t =>
+        '<div class="logrow" style="align-items:center"><div style="flex:1;min-width:0"><button type="button" data-profile="' + t.carId + '" style="background:none;border:0;padding:0;color:var(--brand);font-weight:800;text-align:left">' + esc(t.ownerName) + '</button>' +
+        '<div class="small">' + esc(t.plateDisplay) + '</div></div><div style="text-align:right"><b style="color:var(--bad)">' + sum(t.remaining) + '</b>' +
+        (t.overdueDays > 0 ? '<div><span class="pill bad">' + t.overdueDays + ' kun</span></div>' : '<div class="small">muddatida</div>') + '</div></div>').join('')
+        : '<div class="empty">Qarzdor yo\'q 🎉</div>';
+      $('homeBdays').innerHTML = h.birthdays.length ? h.birthdays.map(b =>
+        '<div class="logrow" style="align-items:center"><div style="flex:1;min-width:0"><button type="button" data-profile="' + b.carId + '" style="background:none;border:0;padding:0;color:var(--brand);font-weight:800;text-align:left">' + esc(b.ownerName) + '</button>' +
+        ' ' + (b.today ? '<span class="pill warn">Bugun!</span>' : '') + '<div class="small">' + fmt(b.birthDate).slice(0, 5) + ' · ' + esc(b.plateDisplay) + '</div></div>' +
+        (b.telegramConnected ? '<button class="btn-ghost btn-sm" type="button" data-msg="' + b.carId + '" data-label="' + esc(b.plateDisplay + ' · ' + b.ownerName) + '" data-tpl="bday">✉️ Tabriklash</button>' : '<span class="small">Telegram yo\'q</span>') + '</div>').join('')
+        + '<div class="hint" style="margin-top:8px">Bot tug\'ilgan kuni ertalab 09:00 da avtomatik tabrik yuboradi. Chegirma taklif qilmoqchi bo\'lsangiz, «Tabriklash» orqali yozing.</div>'
+        : '<div class="empty">Shu oy tug\'ilgan kun yo\'q. Profilda tug\'ilgan kunni kiriting.</div>';
+    } catch (err) { flash('homeMsg', err.message, 'err'); }
+  }
+
+  const homeRow = (icon, label, value, tabKey, filter) =>
+    '<button type="button" class="logrow" data-home="' + tabKey + '"' + (filter ? ' data-hfilter="' + filter + '"' : '') +
+    ' style="width:100%;background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:10px 0;color:inherit;font-weight:400;cursor:pointer;align-items:center">' +
+    '<span style="flex:1;text-align:left">' + icon + ' ' + label + '</span><b>' + esc(value) + '</b></button>';
+
+  /** Kunlik tushum ustunli grafigi (SVG, masshtab bo'yicha). */
+  function revenueChart(days) {
+    const W = 560, H = 190, pad = { l: 8, r: 8, t: 22, b: 24 };
+    const max = Math.max(...days.map(d => d.amount), 1);
+    const bw = (W - pad.l - pad.r) / days.length;
+    const y = (v) => pad.t + (H - pad.t - pad.b) * (1 - v / max);
+    const total = days.reduce((a, d) => a + d.amount, 0);
+    if (!total) return '<div class="empty">Shu oy hali to\'lov qabul qilinmagan</div>';
+    const peak = days.reduce((a, d) => d.amount > a.amount ? d : a, days[0]);
+    let bars = '';
+    days.forEach((d, i) => {
+      const x = pad.l + i * bw + bw * 0.15, w = bw * 0.7, top = y(d.amount), isLast = i === days.length - 1;
+      bars += '<rect x="' + x.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + (H - pad.b - top).toFixed(1) + '" rx="2" fill="' + (isLast ? 'var(--accent, #e8a33d)' : 'var(--brand)') + '" opacity="' + (d.amount ? 1 : .15) + '"><title>' + fmt(d.date) + ': ' + sum(d.amount) + '</title></rect>';
+      if (i === 0 || (i + 1) % 5 === 0 || isLast) bars += '<text x="' + (x + w / 2).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="11" fill="var(--muted)">' + (i + 1) + '</text>';
+    });
+    const px = pad.l + days.indexOf(peak) * bw + bw / 2;
+    bars += '<text x="' + Math.min(Math.max(px, 40), W - 40).toFixed(1) + '" y="' + (y(peak.amount) - 6).toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">' + (peak.amount / 1e6 >= 1 ? (peak.amount / 1e6).toFixed(1) + ' mln' : Math.round(peak.amount / 1e3) + ' ming') + '</text>';
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Shu oy kunlik tushum, jami ' + sum(total) + '" style="width:100%;height:auto;display:block">' +
+      '<line x1="' + pad.l + '" x2="' + (W - pad.r) + '" y1="' + (H - pad.b) + '" y2="' + (H - pad.b) + '" stroke="var(--line)"/>' + bars + '</svg>' +
+      '<div class="small" style="margin-top:6px">Jami: <b>' + sum(total) + '</b> · ustun ustiga olib boring — kunlik summa. To\'q sariq — bugun.</div>';
+  }
+
+  // ================= TELEGRAM XABAR =================
+  const TEMPLATES = {
+    ready: ['Mashina tayyor', 'Assalomu alaykum! Mashinangiz tayyor, kelib olib ketishingiz mumkin.'],
+    promo: ['Aksiya', 'Assalomu alaykum! Shu hafta moy almashtirishga 10% chegirma. Oldindan yozilib qo\'ying.'],
+    bday: ['Tabrik + chegirma', 'Tug\'ilgan kuningiz bilan tabriklaymiz! 🎉 Sizga shu oy ichida barcha xizmatlarga 10% chegirma.'],
+    debt: ['Qarz haqida', 'Assalomu alaykum! Servisimizdagi qarzingizni to\'lash muddati yaqinlashdi. Iltimos, imkon qadar tezroq to\'lang.']
+  };
+  let msgCtx = null;
+
+  function openMsg(id, label, tpl) {
+    msgCtx = { id };
+    $('msgInfo').textContent = label;
+    $('msgMsg').className = 'msg';
+    $('msgText').value = tpl && TEMPLATES[tpl] ? TEMPLATES[tpl][1] : '';
+    $('msgTemplates').innerHTML = Object.entries(TEMPLATES).map(([k, [l]]) => '<button type="button" class="chip" data-tpl-pick="' + k + '">' + l + '</button>').join('');
+    show('msgModal', true);
+    $('msgText').focus();
+  }
+  function closeMsg() { show('msgModal', false); msgCtx = null; }
+  $('msgClose').onclick = closeMsg;
+  $('msgModal').addEventListener('click', (e) => { if (e.target.id === 'msgModal') closeMsg(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && msgCtx) closeMsg(); });
+  $('msgForm').onsubmit = async (e) => {
+    e.preventDefault();
+    $('msgSend').disabled = true;
+    try {
+      await api('/center/customers/' + msgCtx.id + '/message', { method: 'POST', body: JSON.stringify({ text: $('msgText').value }) });
+      closeMsg();
+      flash(tab === 'home' ? 'homeMsg' : tab === 'profile' ? 'profMsg' : 'custMsg', 'Xabar yuborildi ✓');
+    } catch (err) { flash('msgMsg', err.message, 'err'); }
+    $('msgSend').disabled = false;
+  };
+
+  // ================= MIJOZNI QO'LDA QO'SHISH =================
+  $('custAddBtn').onclick = () => {
+    $('addCustForm').reset(); $('acPhone').value = '+998 '; $('acMsg').className = 'msg';
+    $('acBd').max = iso(new Date());
+    $('acSrc').innerHTML = '<option value="">—</option>' + SOURCES.map(x => '<option>' + esc(x) + '</option>').join('');
+    show('addCustCard', true);
+    $('addCustCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('acPlate').focus();
+  };
+  $('acCancel').onclick = () => show('addCustCard', false);
+  $('addCustForm').onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const d = await api('/center/customers', { method: 'POST', body: JSON.stringify({
+        plateNumber: $('acPlate').value, phone: $('acPhone').value, firstName: $('acFn').value, lastName: $('acLn').value || null,
+        birthDate: $('acBd').value || null, gender: $('acG').value || null, source: $('acSrc').value || null, note: $('acNote').value || null }) });
+      show('addCustCard', false);
+      openProfile(d.customer.id, 'customers');
+    } catch (err) { flash('acMsg', err.message, 'err'); }
+  };
+
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.msg) { openMsg(Number(b.dataset.msg), b.dataset.label, b.dataset.tpl); return; }
+    if (b.dataset.tplPick) { $('msgText').value = TEMPLATES[b.dataset.tplPick][1]; $('msgText').focus(); return; }
+    if (b.dataset.home) {
+      if (b.dataset.hfilter) custFilter = b.dataset.hfilter;
+      openTab(b.dataset.home);
+    }
+  });
+
+  // ================= MIJOZLAR BAZASI =================
+  const FILTERS = [['ALL', 'Barchasi'], ['ACTIVE', 'Faol'], ['INACTIVE', 'Nofaol'], ['REPEAT', 'Qayta kelgan'], ['OVERDUE', "Muddati o'tgan"], ['SOON', '7 kun ichida'], ['NO_TELEGRAM', "Telegram yo'q"], ['LOST', 'Boshqa joyga ketgan'], ['NEW', 'Yangi (30 kun)'], ['BLACKLIST', "Qora ro'yxat"]];
+  let custFilter = 'ALL', custTimer = null, openCust = null;
+
+  function custPill(r) {
+    if (r.status === 'OVERDUE') return '<span class="pill bad">' + (-r.daysLeft) + ' kun o\'tdi</span>';
+    if (r.status === 'SOON') return '<span class="pill warn">' + (r.daysLeft === 0 ? 'Bugun' : r.daysLeft + ' kun qoldi') + '</span>';
+    if (r.status === 'LOST') return '<span class="pill grey">Boshqa joyga ketgan</span>';
+    return '<span class="pill ok">Faol</span>';
+  }
+
+  function initCustomers() {
+    const isSuper = me.role === 'SUPER_ADMIN';
+    show('custExport', me.role === 'DIRECTOR');
+    show('custAddBtn', !isSuper);
+    show('custTiles', !isSuper);
+    show('bdayBtn', !isSuper);
+    show('addCustCard', false);
+    show('custFilters', !isSuper);
+    show('custCard', false);
+    $('custHead').innerHTML = isSuper
+      ? '<tr><th>Mashina</th><th>Egasi</th><th>Telefon</th><th>Telegram</th><th>Ro\'yxatdan o\'tgan</th><th>Qaysi servislarda</th></tr>'
+      : '<tr><th>Mashina</th><th>Egasi</th><th>Telefon</th><th>Tashriflar</th><th>Oxirgi tashrif</th><th>Keyingi servis</th><th>Holat</th><th><span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden">Amallar</span></th></tr>';
+    loadCustomers();
+  }
+
+  async function loadCustomers() {
+    const q = $('custQ').value.trim();
+    try {
+      if (me.role === 'SUPER_ADMIN') {
+        const d = await api('/super/customers' + (q ? '?q=' + encodeURIComponent(q) : ''));
+        $('custHint').textContent = 'Butun tizimda ' + d.totalCars + ' ta mashina, ' + d.telegramConnected + ' tasi Telegramga ulangan.';
+        $('custRows').innerHTML = d.rows.length ? d.rows.map(r =>
+          '<tr><td><b>' + esc(r.plateDisplay) + '</b></td><td>' + esc(r.ownerName) + '</td><td>' + telLink(r.phone, r.phoneDisplay) + '</td><td>' + tgBadge(r.telegramConnected) + '</td>' +
+          '<td>' + esc(fmtTime(r.registeredAt)) + '</td><td class="small">' + (r.centers.length ? r.centers.map(esc).join(', ') : 'faqat o\'zi kiritgan') + '</td></tr>').join('')
+          : '<tr><td colspan="6" class="empty">Hech narsa topilmadi</td></tr>';
+        $('custMore').textContent = d.rows.length >= 200 ? "Oxirgi 200 tasi ko'rsatildi. Aniqroq qidiring." : '';
+        return;
+      }
+      const d = await api('/center/customers?filter=' + custFilter + (q ? '&q=' + encodeURIComponent(q) : ''));
+      $('custHint').textContent = 'Servisingiz mijozlari. Qatorni bosing — mijoz profili ochiladi.';
+      const k = d.counts;
+      $('custTiles').innerHTML = [['ALL', '👥', 'Jami mijozlar'], ['ACTIVE', '✅', 'Faol mijozlar'], ['INACTIVE', '💤', 'Nofaol mijozlar'], ['REPEAT', '🔁', 'Qayta kelganlar']]
+        .map(([f, i, l]) => '<button type="button" class="tile" data-cfilter="' + f + '" style="text-align:left;cursor:pointer;color:inherit;' + (custFilter === f ? 'border-color:var(--brand);box-shadow:0 0 0 2px var(--brand) inset' : '') + '"><span>' + i + ' ' + l + '</span><b>' + (k[f] ?? 0) + '</b></button>').join('');
+      $('bdayBtn').innerHTML = '🎂 Bu oy tug\'ilgan kunlar <span class="pill warn" style="margin-left:4px">' + (k.BIRTHDAY ?? 0) + '</span>';
+      $('bdayBtn').setAttribute('aria-pressed', String(custFilter === 'BIRTHDAY'));
+      $('bdayBtn').dataset.cfilter = 'BIRTHDAY';
+      $('custFilters').innerHTML = FILTERS.map(([k, l]) =>
+        '<button type="button" class="chip" data-cfilter="' + k + '" aria-pressed="' + (k === custFilter) + '" style="' + (k === custFilter ? 'background:var(--brand);color:var(--brand-ink);border-color:var(--brand)' : '') + '">' +
+        l + ' · ' + (d.counts[k] ?? 0) + '</button>').join('');
+      $('custRows').innerHTML = d.rows.length ? d.rows.map(r =>
+        '<tr data-cust="' + r.id + '" style="cursor:pointer"><td><button type="button" class="link-btn" data-cust="' + r.id + '" style="background:none;border:0;padding:0;color:var(--brand);font-weight:800">' + esc(r.plateDisplay) + '</button></td>' +
+        '<td>' + esc(r.ownerName) + (r.loyaltyLevel ? ' <span class="lvl ' + esc(r.loyaltyLevel) + '" title="Jamg\'arma karta: ' + pts(r.points) + '">' + esc(r.loyaltyIcon) + ' ' + esc(Number(r.points || 0).toLocaleString('ru-RU')) + '</span>' : '') + (r.blacklisted ? ' <span class="pill bad" title="' + esc(r.blacklistReason || '') + '">⛔ Qora ro\'yxat</span>' : '') +
+          (r.birthDate && new Date(r.birthDate).getMonth() === new Date().getMonth() ? ' <span title="Tug\'ilgan kun: ' + fmt(r.birthDate) + '">🎂</span>' : '') +
+          (r.note ? '<div class="small">📝 ' + esc(r.note.length > 40 ? r.note.slice(0, 40) + '…' : r.note) + '</div>' : '') + '</td>' +
+        '<td style="white-space:nowrap">' + esc(r.phoneDisplay) + ' ' + tgBadge(r.telegramConnected) + '</td>' +
+        '<td>' + r.visits + '</td><td>' + fmt(r.lastVisit) + '</td>' +
+        '<td>' + (r.nextService ? esc(r.nextService) + '<div class="small">' + fmt(r.nextDate) + '</div>' : '—') + '</td><td>' + (r.visits === 0 ? '<span class="pill grey">Hali kelmagan</span>' : custPill(r)) + '</td>' +
+        '<td style="white-space:nowrap;text-align:right">' + telLink(r.phone, '') +
+        (r.telegramConnected ? ' <button class="btn-ghost btn-sm" type="button" data-msg="' + r.id + '" data-label="' + esc(r.plateDisplay + ' · ' + r.ownerName) + '" aria-label="Telegramda xabar yozish">✉️</button>' : '') + '</td></tr>').join('')
+        : '<tr><td colspan="8" class="empty">Hech narsa topilmadi</td></tr>';
+      $('custMore').textContent = d.total > d.rows.length ? d.total + ' tadan ' + d.rows.length + ' tasi ko\'rsatildi. Qidiruv bilan toraytiring.' : d.total + ' ta mijoz';
+    } catch (err) { flash('custMsg', err.message, 'err'); }
+  }
+
+  $('custQ').addEventListener('input', () => { clearTimeout(custTimer); custTimer = setTimeout(loadCustomers, 350); });
+
+  // ================= MIJOZ PROFILI =================
+  const SOURCES = ['Instagram', 'Telegram', 'Tanish tavsiyasi', 'Google / Xarita', 'Yo\'ldan ko\'rib kelgan', 'Reklama', 'Boshqa'];
+  let profFrom = 'customers', profTab = 'history', profData = null, profEdit = false, noteEdit = false, linkOpen = false, blEdit = false;
+
+  function openCustomer(id) { openProfile(id, tab); }
+
+  async function openProfile(id, from) {
+    if (from && from !== 'profile') profFrom = from;
+    try {
+      const [pd, pl] = await Promise.all([api('/center/customers/' + id), api('/center/customers/' + id + '/loyalty').catch(() => null)]);
+      profData = pd; profLoy = pl;
+      openCust = id; profEdit = false; noteEdit = false; linkOpen = false; blEdit = false; adjOpen = false;
+      Object.values(VIEWS).forEach(v => show(v, false));
+      show('vProfile', true); tab = 'profile';
+      $('profMsg').className = 'msg';
+      renderProfile();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) { flash(profFrom === 'debts' ? 'debtMsg' : 'custMsg', err.message, 'err'); }
+  }
+
+  const regText = (s) => { const d = new Date(s), n = new Date(); return d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear() ? 'Shu oyda' : fmt(s); };
+  const genderText = (g) => g === 'MALE' ? 'Erkak' : g === 'FEMALE' ? 'Ayol' : '—';
+  const initials = (n) => n.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
+
+  function renderProfile() {
+    const d = profData, c = d.customer;
+    // ---- Chap: mijoz ma'lumotlari ----
+    $('profInfo').innerHTML = profEdit ? profileForm(d) :
+      '<div style="display:flex;gap:12px;align-items:center"><div class="avatar">' + esc(initials(c.ownerName)) + '</div>' +
+      '<div><div style="font-weight:800;font-size:18px">' + esc(c.ownerName) + '</div><div class="small">' + esc(c.phoneDisplay) + '</div></div></div>' +
+      '<div class="facts">' +
+      fact('Ro\'yxatdan o\'tgan', regText(d.registeredAt)) + fact('Tug\'ilgan kun', d.birthDate ? fmt(d.birthDate) : '—') +
+      fact('Jinsi', genderText(d.gender)) + fact('Telefon', c.phoneDisplay) +
+      '<div><div class="lbl">Telegram bot</div><div class="val">' + (c.telegramConnected ? '<span style="color:var(--ok)">● Ulangan</span>'
+        : '<span style="color:var(--muted)">● Ulanmagan</span> <button class="btn-ghost btn-sm" type="button" id="profLinkBtn">Ulash</button>') + '</div></div>' +
+      fact('Mashina raqami', c.plateDisplay) + fact('Mijoz qayerdan kelgan', d.source || '—') + fact('Tashriflar', c.visits + ' ta') +
+      '</div>' +
+      (linkOpen ? '<div class="linkbox">Mijozga shu havolani yuboring (SMS yoki boshqa messenjer orqali). U botni ochib, raqamini tasdiqlasa, eslatmalar Telegramga keladi:<br><b>' + esc(d.telegramLink) + '</b>' +
+        '<div class="btns"><button class="btn-sm" type="button" data-copy="' + esc(d.telegramLink) + '">Nusxalash</button></div></div>' : '') +
+      (c.blacklisted ? '<div class="msg show err" style="margin-top:6px">⛔ <b>Qora ro\'yxatda:</b> ' + esc(c.blacklistReason || '') +
+        (d.blacklistedBy ? '<div class="small">' + esc(d.blacklistedBy) + ', ' + esc(fmtTime(d.blacklistedAt)) + '</div>' : '') + '</div>' : '') +
+      (blEdit ? '<form id="blForm" novalidate class="linkbox"><label for="blReason">Qora ro\'yxatga qo\'shish sababi</label>' +
+        '<input id="blReason" maxlength="200" placeholder="Masalan: qarzini to\'lamadi, qo\'pol muomala">' +
+        '<div class="btns"><button class="btn-sm" type="submit" style="background:var(--bad)">Qo\'shish</button><button class="btn-ghost btn-sm" type="button" id="blCancel">Bekor qilish</button></div></form>' : '') +
+      '<div class="btns"><button class="btn-ghost btn-sm" type="button" id="profEditBtn">✏️ Tahrirlash</button>' +
+      (c.telegramConnected ? '<button class="btn-ghost btn-sm" type="button" data-msg="' + c.id + '" data-label="' + esc(c.plateDisplay + ' · ' + c.ownerName) + '">✉️ Xabar yozish</button>' : '') +
+      '<button class="btn-ghost btn-sm" type="button" data-copy="' + esc(d.carUrl) + '">Mijoz sahifasi havolasi</button>' +
+      (me.role === 'DIRECTOR' ? (c.blacklisted
+        ? '<button class="btn-ghost btn-sm" type="button" id="blRemove">Qora ro\'yxatdan chiqarish</button>'
+        : (blEdit ? '' : '<button class="btn-ghost btn-sm" type="button" id="blBtn" style="color:var(--bad)">⛔ Qora ro\'yxatga</button>')) : '') + '</div>';
+
+    // ---- O'rta: qarz kartalari, so'ndirish, izoh ----
+    const t = d.debts;
+    $('profMiddle').innerHTML =
+      '<div class="minis">' +
+      mini('Umumiy qarz', sum(t.totalDebt), 'var(--bad)') + mini('To\'langan', sum(t.paid), 'var(--ok)') +
+      mini('Qoldiq', sum(t.remaining), t.remaining > 0 ? 'var(--bad)' : 'var(--ink)') + mini('Kechikish kunlari', t.maxOverdueDays + ' kun', t.maxOverdueDays > 0 ? 'var(--bad)' : 'var(--ink)') +
+      '</div>' +
+      '<button class="btn-block" type="button" id="profPayBtn"' + (t.remaining > 0 ? '' : ' disabled') + ' style="margin-bottom:10px">💵 Qarzni so\'ndirish' + (t.remaining > 0 ? ' · ' + sum(t.remaining) : '') + '</button>' +
+      '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>📝 Izoh</b>' +
+      (noteEdit ? '' : '<button class="btn-ghost btn-sm" type="button" id="noteEditBtn">Tahrirlash</button>') + '</div>' +
+      (noteEdit
+        ? '<form id="noteForm" novalidate style="margin-top:10px"><textarea id="noteText" rows="4" maxlength="500" placeholder="Masalan: doimiy mijoz, 10% chegirma">' + esc(c.note || '') + '</textarea>' +
+          '<div class="btns"><button class="btn-sm" type="submit">Saqlash</button><button class="btn-ghost btn-sm" type="button" id="noteCancel">Bekor qilish</button></div></form>'
+        : '<div style="margin-top:8px;white-space:pre-wrap">' + (c.note ? esc(c.note) : '<span class="small">Izoh yo\'q</span>') + '</div>' +
+          (d.noteUpdatedBy ? '<div class="small" style="margin-top:6px">' + esc(d.noteUpdatedBy) + ', ' + esc(fmtTime(d.noteUpdatedAt)) + '</div>' : '')) +
+      '<div class="small" style="margin-top:6px">Izohni faqat sizning servis xodimlari ko\'radi.</div></div>';
+
+    // ---- O'ng: sadoqat kartasi, statistika va hozirgi servislar ----
+    $('profSide').innerHTML = profLoyaltyBlock() +
+      '<div class="card"><b>Statistika</b><div class="facts" style="margin:10px 0 0">' +
+      fact('Jami xarajat', sum(d.spend.totalSpent)) + fact('O\'rtacha chek', sum(d.spend.averageCheck)) +
+      fact('Oxirgi tashrif', fmt(c.lastVisit)) + fact('Boshqa joyda', d.jobsElsewhere + ' ta ish') + '</div></div>' +
+      '<div class="card" style="margin-top:16px"><b>Hozirgi servislar</b><div style="margin-top:10px">' +
+      (d.activeServices.length ? d.activeServices.map(a => '<div class="item" style="margin-bottom:8px"><div class="item-top"><div><b>' + esc(a.serviceName) + '</b><div class="small">' + fmt(a.nextDate) + ' · ' + (a.doneHere ? 'sizda' : 'boshqa joyda') + '</div></div>' + daysPill(a.daysLeft) + '</div></div>').join('')
+        : '<div class="small">Faol servis yo\'q</div>') + '</div></div>';
+
+    // ---- Pastdagi tablar ----
+    document.querySelectorAll('[data-ptab]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ptab === profTab)));
+    $('profTabBody').innerHTML = profTab === 'history' ? profHistory(d) : profTab === 'loyalty' ? profLoyaltyTab() : profDebts(d);
+  }
+
+  const fact = (l, v) => '<div><div class="lbl">' + l + '</div><div class="val">' + esc(v) + '</div></div>';
+  const mini = (l, v, color) => '<div class="mini"><span>' + l + '</span><b style="color:' + color + '">' + esc(v) + '</b></div>';
+
+  function profileForm(d) {
+    return '<form id="profForm" novalidate><b>Mijoz ma\'lumotlarini tahrirlash</b><div id="profFormMsg" class="msg" style="margin-top:10px"></div>' +
+      '<div class="row" style="margin-top:10px"><div class="field"><label for="pfFn">Ism</label><input id="pfFn" maxlength="60" value="' + esc(d.firstName) + '"></div>' +
+      '<div class="field"><label for="pfLn">Familiya</label><input id="pfLn" maxlength="60" value="' + esc(d.lastName) + '"></div></div>' +
+      '<div class="field"><label for="pfPh">Telefon</label><input id="pfPh" type="tel" value="' + esc(d.customer.phoneDisplay) + '"></div>' +
+      '<div class="row"><div class="field"><label for="pfBd">Tug\'ilgan kun</label><input id="pfBd" type="date" max="' + iso(new Date()) + '" value="' + esc(d.birthDate || '') + '"></div>' +
+      '<div class="field"><label for="pfG">Jinsi</label><select id="pfG"><option value="">—</option><option value="MALE"' + (d.gender === 'MALE' ? ' selected' : '') + '>Erkak</option><option value="FEMALE"' + (d.gender === 'FEMALE' ? ' selected' : '') + '>Ayol</option></select></div></div>' +
+      '<div class="field"><label for="pfSrc">Mijoz qayerdan kelgan</label><select id="pfSrc"><option value="">—</option>' +
+      SOURCES.map(s => '<option' + (d.source === s ? ' selected' : '') + '>' + esc(s) + '</option>').join('') +
+      (d.source && !SOURCES.includes(d.source) ? '<option selected>' + esc(d.source) + '</option>' : '') + '</select></div>' +
+      '<div class="btns"><button type="submit" class="btn-sm">Saqlash</button><button class="btn-ghost btn-sm" type="button" id="profEditCancel">Bekor qilish</button></div></form>';
+  }
+
+  function profHistory(d) {
+    return '<div class="card"><div class="tablebox"><table><thead><tr><th>Sana</th><th>Ish</th><th>Usta</th><th>Probeg</th><th style="text-align:right">Narx</th><th style="text-align:right">To\'langan</th><th>Keyingisi</th></tr></thead><tbody>' +
+      (d.history.length ? d.history.map(h => '<tr' + (h.active ? '' : ' style="opacity:.65"') + '><td>' + fmt(h.doneDate) + '</td><td><b>' + esc(h.serviceName) + '</b>' + (h.note ? '<div class="small">' + esc(h.note) + '</div>' : '') + '</td>' +
+        '<td>' + esc(h.masterName || '—') + '</td><td>' + (h.mileage != null ? Number(h.mileage).toLocaleString('ru-RU') + ' km' : '—') + '</td>' +
+        '<td style="text-align:right;white-space:nowrap">' + (h.price != null ? sum(h.price) + (h.discount > 0 ? '<div class="small">chegirma −' + sum(h.discount) + '</div>' : '') : '<button class="btn-ghost btn-sm" type="button" data-setprice="' + h.id + '" data-car="' + d.customer.id + '" data-label="' + esc(d.customer.plateDisplay + ' · ' + h.serviceName) + '">Narx qo\'yish</button>') + '</td>' +
+        '<td style="text-align:right;white-space:nowrap">' + (h.price != null ? sum(h.paid) + (h.bonusPaid > 0 ? '<div class="small">shundan ball ' + sum(h.bonusPaid) + '</div>' : '') + (h.remaining > 0 ? '<div class="small" style="color:var(--bad)">qarz ' + sum(h.remaining) + '</div>' : '') : '—') + '</td>' +
+        '<td>' + fmt(h.nextDate) + '</td></tr>').join('') : '<tr><td colspan="7" class="empty">Tarix bo\'sh</td></tr>') +
+      '</tbody></table></div></div>';
+  }
+
+  function profDebts(d) {
+    return '<div><div class="card"><b>Qarzga qilingan ishlar</b><div class="tablebox" style="margin-top:10px"><table><thead><tr><th>Ish sanasi</th><th>Ish</th><th style="text-align:right">Qarz</th><th style="text-align:right">Qoldiq</th><th>Muddat</th><th></th></tr></thead><tbody>' +
+      (d.debtRows.length ? d.debtRows.map(r => '<tr><td>' + fmt(r.doneDate) + '</td><td>' + esc(r.serviceName) + '</td><td style="text-align:right;white-space:nowrap">' + sum(r.price) + '</td>' +
+        '<td style="text-align:right;white-space:nowrap;font-weight:700">' + sum(r.remaining) + '</td><td>' + fmt(r.payDueDate) + '<div>' + debtPill(r) + '</div></td>' +
+        '<td>' + (r.remaining > 0 ? '<button class="btn-sm" type="button" data-pay="' + r.recordId + '" data-car="' + r.carId + '" data-rem="' + r.remaining + '" data-label="' + esc(r.plateDisplay + ' · ' + r.serviceName) + '">To\'lash</button>' : '') + '</td></tr>').join('')
+        : '<tr><td colspan="6" class="empty">Qarz yo\'q</td></tr>') + '</tbody></table></div></div>' +
+      '<div class="card"><b>Tranzaksiyalar tarixi</b><div class="tablebox" style="margin-top:10px"><table><thead><tr><th>Sana</th><th style="text-align:right">Summa</th><th>Ish</th><th>Turi</th><th>Qabul qildi</th></tr></thead><tbody>' +
+      (d.payments.length ? d.payments.map(p => '<tr><td>' + esc(fmtTime(p.createdAt)) + '</td><td style="text-align:right;white-space:nowrap;color:var(--ok);font-weight:700">' + sum(p.amount) + '</td>' +
+        '<td>' + esc(p.serviceName) + (p.note ? '<div class="small">' + esc(p.note) + '</div>' : '') + '</td><td>' + esc(p.methodLabel) + '</td><td>' + esc(p.receivedBy || '—') + '</td></tr>').join('')
+        : '<tr><td colspan="5" class="empty">Ma\'lumotlar mavjud emas</td></tr>') + '</tbody></table></div></div></div>';
+  }
+
+  // ================= SADOQAT: profil =================
+  function cardHtml(c, active, title) {
+    return '<div class="lcard ' + esc(c.level) + (active ? '' : ' off') + '"><div class="lc-top"><span>💳 ' + esc(title) + '</span><span>' + esc(c.levelIcon + ' ' + c.levelLabel) + '</span></div>' +
+      '<div class="lc-bal">' + esc(pts(c.balance)) + '</div><div class="lc-num">' + esc(c.cardDisplay) + '</div>' +
+      (c.nextLevelLabel ? '<div class="lc-bar" role="progressbar" aria-valuenow="' + c.progressPct + '" aria-valuemin="0" aria-valuemax="100" aria-label="Keyingi darajagacha"><i style="width:' + c.progressPct + '%"></i></div>' +
+        '<div style="font-size:12px;margin-top:6px">' + esc(c.nextLevelLabel) + ' darajagacha yana ' + esc(sum(c.toNextLevel)) + '</div>'
+        : '<div style="font-size:12px;margin-top:8px">Eng yuqori daraja</div>') + '</div>';
+  }
+
+  function profLoyaltyBlock() {
+    const L = profLoy;
+    if (!L) return '';
+    const c = L.card;
+    if (!c) {
+      const can = L.programEnabled && !L.blacklisted;
+      return '<div class="card" style="margin-bottom:16px"><b>🎁 Sadoqat</b><div class="small" style="margin-top:6px">' +
+        (!L.programEnabled ? 'Sadoqat dasturi yoqilmagan.' : L.blacklisted ? 'Qora ro\'yxatdagi mijozga karta ochilmaydi.' : 'Jamg\'arma karta hali ochilmagan. Keyingi ishda avtomatik ochiladi.') + '</div>' +
+        (can ? '<div class="btns"><button class="btn-sm" type="button" id="loyIssueBtn">💳 Karta ochish</button></div>' : '') + '</div>';
+    }
+    return '<div class="card" style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px"><b>🎁 Jamg\'arma karta</b>' +
+      (L.programEnabled ? '' : '<span class="pill grey">Dastur to\'xtatilgan</span>') + '</div>' + cardHtml(c, L.programEnabled, me.centerName) +
+      '<div class="facts" style="margin:12px 0 0">' +
+      fact('Keshbek', L.programEnabled && !L.blacklisted ? c.cashbackPct + '%' : '—') + fact('Chegirma', L.programEnabled && !L.blacklisted && c.discountPct ? c.discountPct + '%' : '—') +
+      fact('Jami yig\'ilgan', pts(c.earnedTotal)) + fact('Ishlatilgan', pts(c.redeemedTotal)) +
+      fact('Jami xarid (pul bilan)', sum(c.spendTotal)) + fact('Ballar amal qiladi', c.expiresOn ? fmt(c.expiresOn) + ' gacha' : 'muddatsiz') + '</div>' +
+      (adjOpen ? '<form id="adjForm" novalidate class="linkbox"><div class="row"><div class="field"><label for="adjDir">Amal</label><select id="adjDir"><option value="1">Qo\'shish</option><option value="-1">Ayirish</option></select></div>' +
+        '<div class="field"><label for="adjPts">Ball</label><input id="adjPts" inputmode="numeric" autocomplete="off" placeholder="masalan 10 000"></div></div>' +
+        '<div class="field"><label for="adjNote">Sabab</label><input id="adjNote" maxlength="200" placeholder="Masalan: shikoyat uchun kompensatsiya"></div>' +
+        '<div id="adjMsg" class="msg"></div><div class="btns"><button class="btn-sm" type="submit">Saqlash</button><button class="btn-ghost btn-sm" type="button" id="adjCancel">Bekor qilish</button></div></form>' : '') +
+      '<div class="btns">' + (me.role === 'DIRECTOR' && !adjOpen ? '<button class="btn-ghost btn-sm" type="button" id="adjBtn">± Ballarni tuzatish</button>' : '') +
+      '<button class="btn-ghost btn-sm" type="button" data-ptab="loyalty">Ball tarixi</button></div>' +
+      (L.blacklisted ? '<div class="small" style="margin-top:8px;color:var(--bad)">Mijoz qora ro\'yxatda — ball yozilmaydi, chegirma berilmaydi.</div>' : '') + '</div>';
+  }
+
+  const txSign = (n) => '<span class="' + (n >= 0 ? 'pts-plus' : 'pts-minus') + '">' + (n >= 0 ? '+' : '−') + esc(pts(Math.abs(n))) + '</span>';
+
+  function profLoyaltyTab() {
+    const L = profLoy;
+    if (!L || !L.card) return '<div class="card"><div class="empty">Jamg\'arma karta yo\'q</div></div>';
+    return '<div class="card"><div class="tablebox"><table><thead><tr><th>Sana</th><th>Turi</th><th style="text-align:right">Ball</th><th style="text-align:right">Balans</th><th>Izoh</th><th>Kim</th></tr></thead><tbody>' +
+      (L.transactions.length ? L.transactions.map(t => '<tr><td>' + esc(fmtTime(t.at)) + '</td><td>' + esc(t.typeLabel) + '</td><td style="text-align:right;white-space:nowrap">' + txSign(t.points) + '</td>' +
+        '<td style="text-align:right;white-space:nowrap">' + esc(pts(t.balanceAfter)) + '</td><td>' + esc(t.note || t.serviceName || '') + '</td><td>' + esc(t.actorName || '—') + '</td></tr>').join('')
+        : '<tr><td colspan="6" class="empty">Hali harakat yo\'q</td></tr>') + '</tbody></table></div></div>';
+  }
+
+  async function setBlacklist(on, reason) {
+    try {
+      profData = await api('/center/customers/' + openCust + '/blacklist', { method: 'PATCH', body: JSON.stringify({ blacklisted: on, reason }) });
+      profLoy = await api('/center/customers/' + openCust + '/loyalty').catch(() => profLoy);
+      blEdit = false; renderProfile();
+      flash('profMsg', on ? 'Qora ro\'yxatga qo\'shildi' : 'Qora ro\'yxatdan chiqarildi');
+    } catch (err) { flash('profMsg', err.message, 'err'); }
+  }
+
+  async function saveCustomer(body, msgId) {
+    try {
+      profData = await api('/center/customers/' + openCust, { method: 'PATCH', body: JSON.stringify(body) });
+      profEdit = false; noteEdit = false;
+      renderProfile();
+      flash('profMsg', 'Saqlandi');
+    } catch (err) { flash(msgId, err.message, 'err'); }
+  }
+
+  document.addEventListener('submit', (e) => {
+    if (e.target.id === 'profForm') {
+      e.preventDefault();
+      saveCustomer({ firstName: $('pfFn').value, lastName: $('pfLn').value, phone: $('pfPh').value,
+        birthDate: $('pfBd').value || null, gender: $('pfG').value || null, source: $('pfSrc').value || null, profileEdit: true }, 'profFormMsg');
+    }
+    if (e.target.id === 'blForm') {
+      e.preventDefault();
+      setBlacklist(true, $('blReason').value);
+    }
+    if (e.target.id === 'adjForm') {
+      e.preventDefault();
+      const n = num($('adjPts').value);
+      if (!n) { flash('adjMsg', 'Ball miqdorini kiriting', 'err'); return; }
+      api('/center/customers/' + openCust + '/loyalty/adjust', { method: 'POST', body: JSON.stringify({ points: n * Number($('adjDir').value), note: $('adjNote').value }) })
+        .then(r => { profLoy = r; adjOpen = false; renderProfile(); flash('profMsg', 'Ballar yangilandi'); })
+        .catch(err => flash('adjMsg', err.message, 'err'));
+    }
+    if (e.target.id === 'noteForm') {
+      e.preventDefault();
+      saveCustomer({ note: $('noteText').value, profileEdit: false }, 'profMsg');
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b || !$('vProfile') || $('vProfile').classList.contains('hidden')) return;
+    if (b.id === 'profBack') { openTab(profFrom); if (profFrom === 'customers') loadCustomers(); }
+    else if (b.id === 'profEditBtn') { profEdit = true; renderProfile(); }
+    else if (b.id === 'profEditCancel') { profEdit = false; renderProfile(); }
+    else if (b.id === 'noteEditBtn') { noteEdit = true; renderProfile(); $('noteText').focus(); }
+    else if (b.id === 'noteCancel') { noteEdit = false; renderProfile(); }
+    else if (b.id === 'profLinkBtn') { linkOpen = !linkOpen; renderProfile(); }
+    else if (b.id === 'blBtn') { blEdit = true; renderProfile(); $('blReason').focus(); }
+    else if (b.id === 'blCancel') { blEdit = false; renderProfile(); }
+    else if (b.id === 'blRemove') setBlacklist(false, null);
+    else if (b.id === 'adjBtn') { adjOpen = true; renderProfile(); $('adjPts').focus(); }
+    else if (b.id === 'adjCancel') { adjOpen = false; renderProfile(); }
+    else if (b.id === 'loyIssueBtn') {
+      b.disabled = true;
+      api('/center/customers/' + openCust + '/loyalty/card', { method: 'POST' })
+        .then(r => { profLoy = r; renderProfile(); flash('profMsg', 'Jamg\'arma karta ochildi: ' + r.card.cardDisplay); })
+        .catch(err => { b.disabled = false; flash('profMsg', err.message, 'err'); });
+    }
+    else if (b.id === 'profPayBtn') openPay(openCust, profData.debts.remaining, profData.customer.plateDisplay + ' · ' + profData.customer.ownerName + ' · barcha qarzlar', 'customer', openCust);
+    else if (b.dataset.ptab) { profTab = b.dataset.ptab; renderProfile(); }
+  });
+
+  $('custExport').onclick = async () => {
+    try {
+      const res = await fetch('/api/admin/center/customers/export', { headers: { Authorization: 'Bearer ' + token } });
+      if (!res.ok) { const b = await res.json().catch(() => ({})); throw new Error(b.error || 'Yuklab bo\'lmadi'); }
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'mijozlar-' + iso(new Date()) + '.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    } catch (err) { flash('custMsg', err.message, 'err'); }
+  };
+
+  // ================= SADOQAT BO'LIMI =================
+  const LEVELS = [['BRONZE', '🥉', 'Bronza'], ['SILVER', '🥈', 'Kumush'], ['GOLD', '🥇', 'Oltin'], ['PLATINUM', '💎', 'Platina']];
+  let loyData = null, issueOpen = false;
+
+  async function loadLoyalty() {
+    const q = $('loyQ').value.trim();
+    try {
+      const d = await api('/center/loyalty?' + (loyLevel ? 'level=' + loyLevel + '&' : '') + (q ? 'q=' + encodeURIComponent(q) : ''));
+      loyData = d;
+      const P = d.program, S = d.stats, dir = me.role === 'DIRECTOR';
+      $('loyIntro').innerHTML = P.enabled ? '' :
+        '<h2>🎁 Sadoqat dasturi o\'chiq</h2><div style="max-width:68ch">Yoqilsa, har bir mijozga <b>jamg\'arma karta</b> ochiladi. Har pul to\'lovidan belgilangan foiz <b>bonus ball</b> bo\'lib qaytadi (1 ball = 1 so\'m), ' +
+        'ballar keyingi ishlarda to\'lovga ishlatiladi. Mijoz ko\'p xarid qilgani sari darajasi oshadi (Bronza → Kumush → Oltin → Platina) — keshbek va doimiy chegirma ko\'payadi. ' +
+        'Karta ochilishi, ball yozilishi, daraja oshishi va ballar kuyishi haqida mijozga Telegram orqali xabar boradi.</div>' +
+        '<div class="small" style="margin-top:8px">' + (dir ? 'Pastdagi sozlamalarni tekshirib, «Dastur yoqilgan» belgisini qo\'ying va saqlang.' : 'Dasturni direktor yoqadi.') + '</div>';
+      show('loyIntro', !P.enabled);
+      $('loyTiles').innerHTML =
+        '<div class="tile"><span>Jamg\'arma kartalar</span><b>' + S.cards + '</b><div class="small">Shu oy yangi: ' + S.newCardsMonth + ' · balansi borlar: ' + S.withBalance + '</div></div>' +
+        '<div class="tile"><span>Mijozlardagi ballar</span><b style="color:var(--accent, #b7791f)">' + esc(pts(S.balanceTotal)) + '</b><div class="small">Mijozlar oldidagi majburiyat (so\'mda)</div></div>' +
+        '<div class="tile"><span>Shu oy yozildi</span><b style="color:var(--ok)">+' + esc(pts(S.earnedMonth)) + '</b><div class="small">Keshbek va bonuslar</div></div>' +
+        '<div class="tile"><span>Shu oy ishlatildi</span><b>' + esc(pts(S.redeemedMonth)) + '</b><div class="small">' + (S.expiredMonth ? 'Kuydi: ' + esc(pts(S.expiredMonth)) : 'Kuygan ball yo\'q') + '</div></div>';
+      const total = Object.values(d.levelCounts).reduce((a, b) => a + b, 0);
+      $('loyLevels').innerHTML = [['', '', 'Hammasi', total]].concat(LEVELS.map(([k, i, l]) => [k, i, l, d.levelCounts[k] || 0])).map(([k, i, l, n]) =>
+        '<button type="button" class="chip" data-llevel="' + k + '" aria-pressed="' + (k === loyLevel) + '" style="' + chipStyle(k === loyLevel) + '">' + (i ? i + ' ' : '') + l + ' · ' + n + '</button>').join('');
+      $('loyRows').innerHTML = d.members.length ? d.members.map(c =>
+        '<tr data-cust="' + c.carId + '" style="cursor:pointer"><td><button type="button" data-profile="' + c.carId + '" style="background:none;border:0;padding:0;color:var(--brand);font-weight:800;text-align:left">' + esc(c.ownerName) + '</button>' +
+        '<div class="small">' + esc(c.plateDisplay) + '</div></td>' +
+        '<td style="white-space:nowrap;font-family:ui-monospace,Menlo,Consolas,monospace">' + esc(c.cardDisplay) + '</td>' +
+        '<td><span class="lvl ' + esc(c.level) + '">' + esc(c.levelIcon + ' ' + c.levelLabel) + '</span>' + '<div class="small">Xarid: ' + esc(sum(c.spendTotal)) + '</div></td>' +
+        '<td style="text-align:right;white-space:nowrap;font-weight:700">' + esc(pts(c.balance)) + (c.expiresOn ? '<div class="small">' + fmt(c.expiresOn) + ' gacha</div>' : '') + '</td>' +
+        '</tr>').join('')
+        : '<tr><td colspan="4" class="empty">' + (S.cards ? 'Hech narsa topilmadi' : 'Hali karta ochilmagan') + '</td></tr>';
+      $('loyMore').textContent = d.total > d.members.length ? d.total + ' tadan ' + d.members.length + ' tasi ko\'rsatildi' : d.total + ' ta karta';
+      show('loyIssueAll', dir && P.enabled);
+      renderIssueBox();
+      $('loyRecent').innerHTML = d.recent.length ? d.recent.map(t =>
+        '<div class="logrow"><time>' + esc(fmtTime(t.at)) + '</time><div style="flex:1;min-width:0"><button type="button" data-profile="' + t.carId + '" style="background:none;border:0;padding:0;color:var(--brand);font-weight:700;text-align:left">' + esc(t.ownerName) + '</button> ' +
+        '<span class="meta small">· ' + esc(t.plateDisplay) + '</span><div>' + esc(t.typeLabel) + ' ' + txSign(t.points) + (t.note ? ' <span class="small">· ' + esc(t.note) + '</span>' : '') + '</div></div></div>').join('')
+        : '<div class="empty">Hali harakat yo\'q</div>';
+      renderLoySettings(P, dir);
+    } catch (err) { flash('loyMsg', err.message, 'err'); }
+  }
+
+  function renderIssueBox() {
+    const P = loyData && loyData.program;
+    show('loyIssueBox', issueOpen && !!P && P.enabled);
+    if (!issueOpen || !P) return;
+    $('loyIssueBox').innerHTML = 'Bazangizdagi kartasi yo\'q barcha mijozlarga (qora ro\'yxatdagilardan tashqari) karta ochiladi. Telegramga ulanganlarga xabar boradi.' +
+      (P.welcomeBonus > 0 ? '<label class="check" for="issueWelcome" style="margin-top:8px"><input id="issueWelcome" type="checkbox"> Har biriga xush kelibsiz bonusi (' + esc(pts(P.welcomeBonus)) + ')</label>' : '') +
+      '<div class="btns"><button class="btn-sm" type="button" id="issueGo">Karta ochish</button><button class="btn-ghost btn-sm" type="button" id="issueCancel">Bekor qilish</button></div>';
+  }
+
+  function renderLoySettings(P, dir) {
+    const lv = (k) => P.levels.find(l => l.code === k);
+    const g = (n) => Number(n || 0).toLocaleString('ru-RU').replace(/ /g, ' ');
+    if (!dir) {
+      $('loySettings').innerHTML = '<h2>Dastur shartlari</h2>' + (P.enabled ? '' : '<div class="small" style="margin-bottom:8px">Dastur hozir o\'chiq.</div>') +
+        '<div class="tablebox"><table><thead><tr><th>Daraja</th><th style="text-align:right">Jami xarid</th><th style="text-align:right">Keshbek</th><th style="text-align:right">Chegirma</th></tr></thead><tbody>' +
+        P.levels.map(l => '<tr><td>' + esc(l.icon + ' ' + l.label) + '</td><td style="text-align:right;white-space:nowrap">' + (l.from ? esc(sum(l.from)) + ' dan' : 'boshlang\'ich') + '</td><td style="text-align:right">' + l.cashbackPct + '%</td><td style="text-align:right">' + l.discountPct + '%</td></tr>').join('') +
+        '</tbody></table></div><div class="facts" style="margin:12px 0 0">' +
+        fact('Ball bilan to\'lash', 'narxning ' + P.maxRedeemPct + '% gacha') + fact('Ballar kuyishi', P.expiryDays ? P.expiryDays + ' kun kelmasa' : 'kuymaydi') +
+        fact('Karta ochilganda', pts(P.welcomeBonus)) + fact('Tug\'ilgan kunda', pts(P.birthdayBonus)) + '</div>';
+      return;
+    }
+    $('loySettings').innerHTML = '<h2>Sozlamalar</h2><div id="lsMsg" class="msg"></div><form id="lsForm" novalidate>' +
+      '<label class="check field" for="lsEnabled"><input id="lsEnabled" type="checkbox"' + (P.enabled ? ' checked' : '') + '> Dastur yoqilgan</label>' +
+      '<div class="tablebox"><table class="lvl-table"><thead><tr><th>Daraja</th><th>Jami xarid, so\'mdan</th><th>Keshbek %</th><th>Chegirma %</th></tr></thead><tbody>' +
+      LEVELS.map(([k, i, l]) => { const x = lv(k); return '<tr><td style="white-space:nowrap">' + i + ' ' + l + '</td>' +
+        '<td><input data-ls="from" data-lv="' + k + '" inputmode="numeric" aria-label="' + l + ' chegarasi" value="' + (k === 'BRONZE' ? '0' : g(x.from)) + '"' + (k === 'BRONZE' ? ' disabled' : '') + '></td>' +
+        '<td><input data-ls="cash" data-lv="' + k + '" inputmode="numeric" aria-label="' + l + ' keshbek foizi" value="' + x.cashbackPct + '" style="width:64px"></td>' +
+        '<td><input data-ls="disc" data-lv="' + k + '" inputmode="numeric" aria-label="' + l + ' chegirma foizi" value="' + x.discountPct + '" style="width:64px"></td></tr>'; }).join('') +
+      '</tbody></table></div>' +
+      '<div class="row" style="margin-top:10px"><div class="field"><label for="lsRedeem">Ball bilan to\'lash, narxning %</label><input id="lsRedeem" inputmode="numeric" value="' + P.maxRedeemPct + '"></div>' +
+      '<div class="field"><label for="lsExpiry">Ballar kuyadi, kun (0 — kuymaydi)</label><input id="lsExpiry" inputmode="numeric" value="' + P.expiryDays + '"></div></div>' +
+      '<div class="row"><div class="field"><label for="lsWelcome">Karta ochilganda bonus, ball</label><input id="lsWelcome" inputmode="numeric" value="' + g(P.welcomeBonus) + '"></div>' +
+      '<div class="field"><label for="lsBday">Tug\'ilgan kun bonusi, ball</label><input id="lsBday" inputmode="numeric" value="' + g(P.birthdayBonus) + '"></div></div>' +
+      '<div class="loybox" id="lsExample"></div>' +
+      '<div class="hint" style="margin-bottom:10px">Daraja mijozning sizdagi pul bilan to\'lagan jami summasidan hisoblanadi. Ball bilan to\'langan qismdan keshbek yozilmaydi. Qarzga qilingan ish uchun ball qarz to\'langanda yoziladi.' +
+      (P.updatedBy ? ' Oxirgi o\'zgarish: ' + esc(P.updatedBy) + ', ' + esc(fmtTime(P.updatedAt)) + '.' : '') + '</div>' +
+      '<button type="submit" id="lsSave">Saqlash</button></form>';
+    lsExample();
+  }
+
+  function lsValues() {
+    const val = (sel) => { const el = document.querySelector(sel); return el ? (num(el.value) ?? 0) : 0; };
+    return {
+      enabled: $('lsEnabled').checked,
+      levels: LEVELS.map(([k]) => ({ level: k, from: k === 'BRONZE' ? 0 : val('[data-ls=from][data-lv=' + k + ']'),
+        cashbackPct: val('[data-ls=cash][data-lv=' + k + ']'), discountPct: val('[data-ls=disc][data-lv=' + k + ']') })),
+      maxRedeemPct: num($('lsRedeem').value) ?? 0, expiryDays: num($('lsExpiry').value) ?? 0,
+      welcomeBonus: num($('lsWelcome').value) ?? 0, birthdayBonus: num($('lsBday').value) ?? 0
+    };
+  }
+
+  function lsExample() {
+    if (!$('lsExample')) return;
+    const v = lsValues(), x = v.levels[1], price = 500000;
+    const disc = floorPct(price, x.discountPct), fin = price - disc, cash = floorPct(fin, x.cashbackPct);
+    $('lsExample').innerHTML = '<b>Misol:</b> 🥈 Kumush mijoz, ish narxi ' + sum(price) + '.<br>' +
+      (disc ? 'Chegirma ' + x.discountPct + '%: −' + sum(disc) + ' → to\'laydi <b>' + sum(fin) + '</b>.<br>' : 'Chegirmasiz to\'laydi <b>' + sum(fin) + '</b>.<br>') +
+      'Keshbek ' + x.cashbackPct + '%: <b>+' + pts(cash) + '</b>. Keyingi safar ' + sum(floorPct(fin, v.maxRedeemPct)) + ' gacha (narxning ' + v.maxRedeemPct + '%) ball bilan to\'lay oladi.';
+  }
+
+  document.addEventListener('input', (e) => {
+    const t = e.target;
+    if (t.closest && t.closest('#lsForm')) {
+      if (t.dataset.ls === 'from' || t.id === 'lsWelcome' || t.id === 'lsBday') group(t);
+      lsExample();
+    }
+    if (t.id === 'adjPts') group(t);
+  });
+  document.addEventListener('submit', async (e) => {
+    if (e.target.id !== 'lsForm') return;
+    e.preventDefault();
+    $('lsSave').disabled = true;
+    try {
+      await api('/center/loyalty/settings', { method: 'PUT', body: JSON.stringify(lsValues()) });
+      await loadLoyalty();
+      flash('lsMsg', 'Sozlamalar saqlandi');
+    } catch (err) { flash('lsMsg', err.message, 'err'); }
+    if ($('lsSave')) $('lsSave').disabled = false;
+  });
+  $('loyQ').addEventListener('input', () => { clearTimeout(loyTimer); loyTimer = setTimeout(loadLoyalty, 350); });
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.llevel !== undefined) { loyLevel = b.dataset.llevel; loadLoyalty(); return; }
+    if (b.id === 'loyIssueAll') { issueOpen = !issueOpen; renderIssueBox(); return; }
+    if (b.id === 'issueCancel') { issueOpen = false; renderIssueBox(); return; }
+    if (b.id === 'issueGo') {
+      b.disabled = true;
+      try {
+        const r = await api('/center/loyalty/issue-all', { method: 'POST', body: JSON.stringify({ withWelcome: !!($('issueWelcome') && $('issueWelcome').checked) }) });
+        issueOpen = false;
+        await loadLoyalty();
+        flash('loyMsg', r.message);
+      } catch (err) { b.disabled = false; flash('loyMsg', err.message, 'err'); }
+    }
+  });
+
+  // ================= JURNAL =================
+  let centersCache = [];
+  async function loadLog() {
+    const isSuper = me.role === 'SUPER_ADMIN';
+    show('logFilterWrap', isSuper);
+    try {
+      if (isSuper && !$('logFilter').options.length) {
+        const o = await api('/super/overview');
+        centersCache = o.list;
+        $('logFilter').innerHTML = '<option value="">Hammasi</option>' + o.list.map(c => '<option value="' + c.id + '">' + esc(c.name) + '</option>').join('');
+      }
+      const f = isSuper ? $('logFilter').value : '';
+      const list = await api(isSuper ? '/super/log' + (f ? '?centerId=' + f : '') : '/center/log');
+      $('logList').innerHTML = list.length ? list.map(l =>
+        '<div class="logrow"><time>' + esc(fmtTime(l.at)) + '</time><div><b>' + esc(l.actorName) + '</b> <span class="meta">· ' + esc(l.actorRole) +
+        (isSuper && l.centerName ? ', ' + esc(l.centerName) : '') + '</span><div>' + esc(l.action) + '</div></div></div>').join('')
+        : '<div class="empty">Hali yozuv yo\'q</div>';
+    } catch (err) { $('logList').innerHTML = '<div class="msg show err">' + esc(err.message) + '</div>'; }
+  }
+  $('logFilter').onchange = loadLog;
+
+  // ================= SUPER ADMIN =================
+  $('cAddToggle').onclick = () => $('cForm').classList.toggle('hidden');
+  $('cForm').onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api('/super/centers', { method: 'POST', body: JSON.stringify({
+        name: $('cName').value, address: $('cAddr').value || null, phone: $('cPhone').value || null,
+        directorName: $('cDir').value, username: $('cUser').value, password: $('cPass').value }) });
+      flash('cMsg', 'Servis qo\'shildi. Login va parolni direktorga bering.');
+      $('cForm').reset(); $('cForm').classList.add('hidden');
+      $('logFilter').innerHTML = '';
+      loadSuper();
+    } catch (err) { flash('cMsg', err.message, 'err'); }
+  };
+
+  function statusPill(s) {
+    const cls = { 'Faol': 'ok', 'Yangi': 'ok', 'Faol emas': 'warn', 'Ishlatmayapti': 'bad', "O'chirilgan": 'grey' }[s] || 'grey';
+    return '<span class="pill ' + cls + '">' + esc(s) + '</span>';
+  }
+
+  async function loadSuper() {
+    try {
+      const o = await api('/super/overview');
+      $('sTiles').innerHTML = [
+        [o.activeCenters + ' / ' + o.centers, 'Faol servislar'],
+        [o.totalRecords, 'Jami kiritilgan ishlar'],
+        [o.returnRatePct == null ? '—' : o.returnRatePct + '%', 'Mijozlar qaytib kelishi']
+      ].map(([v, l]) => '<div class="tile"><b>' + esc(v) + '</b><span>' + l + '</span></div>').join('');
+
+      $('centers').innerHTML = o.list.length ? o.list.map(c => {
+        const s = c.stats;
+        const last = s.lastActivity ? fmt(s.lastActivity) + ' (' + c.inactiveDays + ' kun oldin)' : 'hali yo\'q';
+        return '<div class="item" id="center-' + c.id + '">' +
+          '<div class="item-top"><div><div class="item-title">' + esc(c.name) + '</div>' +
+          '<div class="small">' + esc([c.address, c.phoneDisplay].filter(Boolean).join(' · ')) + '</div>' +
+          '<div class="small">Direktor: ' + esc(c.directorName || '—') + (c.directorUsername ? ' (' + esc(c.directorUsername) + ')' : '') + ' · xodimlar: ' + c.staffCount + '</div></div>' + statusPill(c.status) + '</div>' +
+          '<div class="statline small"><span>Ishlar: <b>' + s.totalRecords + '</b></span><span>30 kunda: <b>' + s.last30Days + '</b></span>' +
+          '<span>Oxirgi faollik: <b>' + last + '</b></span><span>Mijozlar: <b>' + s.customers + '</b></span></div>' +
+          '<div class="statline small"><span>Vaqti kelgan: <b>' + s.due + '</b></span><span style="color:var(--ok)">Qaytib kelgan: <b>' + s.returned + '</b></span>' +
+          '<span style="color:var(--warn)">Boshqa joyga: <b>' + s.elsewhere + '</b></span><span style="color:var(--bad)">Kelmagan: <b>' + s.missing + '</b></span>' +
+          (s.returnRatePct != null ? '<span>Qaytish: <b>' + s.returnRatePct + '%</b></span>' : '') + '</div>' +
+          '<div class="btns">' +
+          ((s.elsewhere + s.missing) ? '<button class="btn-sm" type="button" data-missed="' + c.id + '">Kelmaganlar va sababi</button>' : '') +
+          '<button class="btn-ghost btn-sm" type="button" data-toggle="' + c.id + '" data-active="' + c.active + '">' + (c.active ? 'O\'chirish' : 'Yoqish') + '</button>' +
+          '<button class="btn-ghost btn-sm" type="button" data-pw="' + c.id + '">Direktor parolini tiklash</button>' +
+          '</div><div class="pwslot"></div><div class="missedslot"></div></div>';
+      }).join('') : '<div class="empty">Hali servis qo\'shilmagan. «+ Servis qo\'shish» tugmasini bosing.</div>';
+    } catch (err) { }
+  }
+
+  // ================= TUGMALAR =================
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    const d = b.dataset;
+
+    if (d.tab) { openTab(d.tab); return; }
+    if (d.cfilter) { custFilter = d.cfilter; show('custCard', false); loadCustomers(); return; }
+    if (d.dfilter) { debtFilter = d.dfilter; loadDebts(); return; }
+    if (d.dperiod) { debtPeriod = d.dperiod; loadDebts(); return; }
+    if (d.pay) { openPay(Number(d.pay), Number(d.rem), d.label, 'pay', d.car ? Number(d.car) : null); return; }
+    if (d.setprice) { openPay(Number(d.setprice), 0, d.label, 'price', d.car ? Number(d.car) : null); return; }
+    if (b.id === 'custClose') { show('custCard', false); return; }
+    if (d.cust) { openProfile(Number(d.cust), tab); return; }
+    if (d.profile) { openProfile(Number(d.profile), tab); return; }
+
+    if (d.ready) {
+      b.disabled = true;
+      try {
+        const r = await api('/center/records/' + d.ready + '/ready', { method: 'POST' });
+        b.textContent = r.delivered ? 'Yuborildi ✓' : 'Yetkazilmadi — qo\'ng\'iroq qiling';
+        setTimeout(loadWork, 1200);
+      } catch (err) { b.textContent = err.message; setTimeout(() => { b.disabled = false; b.textContent = '✅ Tayyor, keling'; }, 3000); }
+      return;
+    }
+    if (d.copy) {
+      try { await navigator.clipboard.writeText(d.copy); b.textContent = 'Nusxalandi ✓'; }
+      catch (err) { b.outerHTML = '<input readonly value="' + esc(d.copy) + '" onclick="this.select()">'; }
+      return;
+    }
+
+    // Direktor: xodimlar
+    if (d.block) {
+      try { await api('/center/staff/' + d.block, { method: 'PATCH', body: JSON.stringify({ blocked: d.to === 'true' }) }); loadStaff(); }
+      catch (err) { flash('staffMsg', err.message, 'err'); }
+      return;
+    }
+    if (d.spw) { $('spw-' + d.spw).classList.toggle('hidden'); return; }
+    if (d.spwsave) {
+      const input = b.parentElement.querySelector('input');
+      try {
+        await api('/center/staff/' + d.spwsave, { method: 'PATCH', body: JSON.stringify({ newPassword: input.value }) });
+        flash('staffMsg', 'Parol yangilandi. Xodim qaytadan kirishi kerak.');
+        loadStaff();
+      } catch (err) { flash('staffMsg', err.message, 'err'); }
+      return;
+    }
+
+    // Super admin
+    if (d.missed) {
+      const slot = $('center-' + d.missed).querySelector('.missedslot');
+      if (slot.innerHTML) { slot.innerHTML = ''; return; }
+      try {
+        const list = await api('/super/centers/' + d.missed + '/missed');
+        slot.innerHTML = '<div class="missed">' + (list.length ? list.map(x =>
+          '<div class="row-m"><div><b>' + esc(x.plateDisplay) + '</b> · ' + esc(x.ownerName) + ' · ' + esc(x.serviceName) +
+          ' <span class="small">(muddat ' + fmt(x.nextDate) + (x.daysOverdue ? ', ' + x.daysOverdue + ' kun o\'tdi' : '') + ')</span></div>' +
+          '<div class="reason">' + esc(x.reason) + '</div><div class="small">' + esc(x.hint) + '</div>' +
+          '<div>' + telLink(x.phone, x.phoneDisplay) + '</div></div>').join('') : '<div class="empty">Kelmagan mijoz yo\'q</div>') + '</div>';
+      } catch (err) { slot.innerHTML = '<div class="msg show err">' + esc(err.message) + '</div>'; }
+      return;
+    }
+    if (d.toggle) {
+      const active = d.active === 'true';
+      if (active && d.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Rostdan o\'chirasizmi? Yana bosing'; return; }
+      try { await api('/super/centers/' + d.toggle, { method: 'PATCH', body: JSON.stringify({ active: !active }) }); loadSuper(); }
+      catch (err) { flash('cMsg', err.message, 'err'); }
+      return;
+    }
+    if (d.pw) {
+      const slot = $('center-' + d.pw).querySelector('.pwslot');
+      slot.innerHTML = slot.innerHTML ? '' : '<div class="inline"><input type="text" placeholder="Yangi parol, kamida 8 belgi" autocomplete="off"><button class="btn-sm" type="button" data-pwsave="' + d.pw + '">Saqlash</button></div>';
+      return;
+    }
+    if (d.pwsave) {
+      const input = b.parentElement.querySelector('input');
+      try {
+        await api('/super/centers/' + d.pwsave, { method: 'PATCH', body: JSON.stringify({ newPassword: input.value }) });
+        b.parentElement.innerHTML = '<span class="small" style="color:var(--ok)">Parol yangilandi. Direktor qaytadan kirishi kerak.</span>';
+      } catch (err) { flash('cMsg', err.message, 'err'); }
+    }
+  });
+
+  // Jadval qatorini bosganda ham mijoz kartasi ochilsin
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('button, a')) return;
+    const tr = e.target.closest('tr[data-cust]');
+    if (tr) openProfile(Number(tr.dataset.cust), tab);
+  });
+
+  start();
+})();
+</script>
+</body>
+</html>
